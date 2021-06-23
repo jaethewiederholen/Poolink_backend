@@ -8,10 +8,10 @@ from django.http import HttpRequest
 from django.test import RequestFactory
 from django.urls import reverse
 
-from poolink_backend.users.forms import UserChangeForm
-from poolink_backend.users.models import User
-from poolink_backend.users.tests.factories import UserFactory
-from poolink_backend.users.views import (
+from poolink_backend.apps.users.forms import UserChangeForm
+from poolink_backend.apps.users.models import User
+from poolink_backend.apps.users.tests.factories import UserFactory
+from poolink_backend.apps.users.views import (
     UserRedirectView,
     UserUpdateView,
     user_detail_view,
