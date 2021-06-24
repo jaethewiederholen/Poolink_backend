@@ -1,7 +1,7 @@
 from django.conf import settings
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
-from poolink_backend.apps.users import UserViewSet
+from poolink_backend.apps.users.api.views import UserViewSet
 
 if settings.DEBUG:
     router = DefaultRouter()
