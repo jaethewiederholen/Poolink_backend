@@ -11,14 +11,16 @@ class UserManager(UserManager):
     def create_user(self, email=None, password=None, **extra_fields):
         return super().create_superuser(email=email, password=password, **extra_fields)
 
-    def get_or_create_user(self, name=None, email=None, password=None):
+    def get_or_create_user(self, username=None, name=None, email=None, password=None):
         users = self.model.objects.filter(email=email)
         is_created = False
         if users.exists():
             user = users.first()
             return user, is_created
         is_created = True
-        user = self.create_user(name=name, email=email, password=password)
+        user = self.create_user(
+            username=username, name=name, email=email, password=password
+        )
         return user, is_created
 
 

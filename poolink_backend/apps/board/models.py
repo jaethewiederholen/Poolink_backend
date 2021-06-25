@@ -15,7 +15,11 @@ class Board(models.Model):
     )
 
     name = models.CharField(
-        verbose_name=_("보드 이름"), help_text=_("보드의 이름입니다"), null=False, default="이름없는 보드"
+        verbose_name=_("보드 이름"),
+        help_text=_("보드의 이름입니다"),
+        null=False,
+        default="이름없는 보드",
+        max_length=255,
     )
     image = models.ImageField(
         verbose_name=_("보드 이미지"),
@@ -43,3 +47,6 @@ class Board(models.Model):
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")
+
+    def __str__(self):
+        return self.name
