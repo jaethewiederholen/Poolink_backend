@@ -65,6 +65,7 @@ DJANGO_APPS = [
     # "django.contrib.humanize", # Handy template tags
     "django.contrib.admin",
     "django.forms",
+    "drf_yasg",
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -77,7 +78,8 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
-    "poolink_backend.users.apps.UsersConfig",
+    "poolink_backend.apps.users.apps.UsersConfig",
+    "poolink_backend.apps.board.apps.BoardConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

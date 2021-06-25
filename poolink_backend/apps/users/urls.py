@@ -1,6 +1,6 @@
 from django.urls import path
 
-from poolink_backend.users.views import (
+from poolink_backend.apps.users.views import (
     user_detail_view,
     user_redirect_view,
     user_update_view,
