@@ -1,6 +1,6 @@
 import pytest
 
-from poolink_backend.users.models import User
+from poolink_backend.apps.users.models import User
 
 pytestmark = pytest.mark.django_db
 
