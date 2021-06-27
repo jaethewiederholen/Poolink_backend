@@ -1,12 +1,14 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from poolink_backend.bases.models import Model
+
 
 class BoardManager(models.Manager):
     pass
 
 
-class Board(models.Model):
+class Board(Model):
     user = models.ForeignKey(
         "users.User",
         verbose_name=_("보드 소유자"),
