@@ -327,3 +327,5 @@ poolink_backend/media/
 #env file
 .env
 
+#pre-commit config file
+.pre-commit-config.yam
