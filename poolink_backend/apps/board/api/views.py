@@ -8,4 +8,4 @@ from rest_framework import decorators
 class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
-    filterset_fields = ["name"]
+    filterset_fields = ["name", "scrap_count"]
