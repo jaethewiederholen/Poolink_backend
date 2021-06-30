@@ -21,14 +21,19 @@ class UserAdmin(auth_admin.UserAdmin):
             {
                 "fields": (
                     "is_active",
-                    "is_staff",
                     "is_superuser",
                     "groups",
+                    "is_staff",
                     "user_permissions",
                 ),
             },
         ),
-        (_("Important dates"), {"fields": ("last_login", "date_joined")}),
+        (_("Important dates"), {"fields": ("last_login", "created")}),
     )
-    list_display = ["username", "name", "is_superuser"]
-    search_fields = ["name"]
+    list_filter = ("is_superuser",)
+    list_display = [
+        "username",
+        "name",
+        "is_superuser",
+    ]
+    search_fields = ["username"]
