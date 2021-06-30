@@ -133,7 +133,7 @@ typing-extensions==3.10.0.0
 uritemplate==3.0.1
 urllib3==1.26.5
 uvicorn==0.13.4
-uvloop==0.15.2
+#uvloop==0.15.2
 virtualenv==20.4.7
 watchgod==0.7
 wcwidth==0.2.5
