@@ -23,12 +23,11 @@ class UserAdmin(auth_admin.UserAdmin):
                     "is_active",
                     "is_superuser",
                     "groups",
-                    "is_staff",
                     "user_permissions",
                 ),
             },
         ),
-        (_("Important dates"), {"fields": ("last_login", "created")}),
+        (_("Important dates"), {"fields": ("last_login",)}),
     )
     list_filter = ("is_superuser",)
     list_display = [
