@@ -8,7 +8,6 @@ from poolink_backend.apps.users.forms import UserChangeForm, UserCreationForm
 User = get_user_model()
 
 
-@admin.register(User)
 class UserAdmin(auth_admin.UserAdmin):
 
     form = UserChangeForm
@@ -21,10 +20,11 @@ class UserAdmin(auth_admin.UserAdmin):
                 "fields": (
                     "username",
                     "password",
+                    "email",
                 )
             },
         ),
-        (_("Personal info"), {"fields": ("name", "email")}),
+        (_("Personal info"), {"fields": ("name",)}),
         (
             _("Permissions"),
             {
@@ -38,6 +38,12 @@ class UserAdmin(auth_admin.UserAdmin):
         ),
         (_("Important dates"), {"fields": ("last_login",)}),
     )
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('username', 'email', 'name', 'password1', 'password2')}
+         ),
+    )
     list_filter = ("is_superuser",)
     list_display = [
         "username",
@@ -45,3 +51,6 @@ class UserAdmin(auth_admin.UserAdmin):
         "is_superuser",
     ]
     search_fields = ["username"]
+
+
+admin.site.register(User, UserAdmin)
