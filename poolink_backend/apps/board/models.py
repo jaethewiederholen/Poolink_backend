@@ -26,10 +26,11 @@ class Board(Model):
         max_length=255,
     )
     image = models.ImageField(
+        upload_to='media',
         verbose_name=_("보드 이미지"),
         help_text=_("유저가 설정한 보드 이미지입니다."),
         null=True,
-        # upload_to=UploadTo()
+        blank=True,
     )
     bio = models.TextField(
         verbose_name=_("보드 설명"),
