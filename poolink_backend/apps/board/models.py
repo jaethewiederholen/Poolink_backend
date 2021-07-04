@@ -3,24 +3,11 @@ from django.utils.translation import ugettext_lazy as _
 
 from poolink_backend.bases.models import Model
 from poolink_backend.apps.users.models import User
+from poolink_backend.apps.category.models import Category
 
 
 class BoardManager(models.Manager):
     pass
-
-
-class Category(Model):
-    name = models.TextField(
-        verbose_name=_("카테고리"),
-        help_text=_("카테고리 이름입니다."),
-        null=False
-    )
-    image = models.ImageField(
-        upload_to='media',
-        verbose_name=_("카테고리 이미지"),
-        help_text=_("카테고리의 이미지입니다."),
-        null=False
-    )
 
 
 class Board(Model):
