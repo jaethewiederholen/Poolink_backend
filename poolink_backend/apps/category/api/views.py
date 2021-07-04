@@ -8,5 +8,5 @@ from rest_framework import decorators
 class CategoryViewSet(ModelViewSet):
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    filterset_fields = ["name", "scrap_count"]
+    filterset_fields = ["name", "color"]
 
