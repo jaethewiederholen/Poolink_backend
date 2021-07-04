@@ -80,6 +80,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     "poolink_backend.apps.users.apps.UsersConfig",
     "poolink_backend.apps.board.apps.BoardConfig",
+    "poolink_backend.apps.category.apps.CategoryConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
