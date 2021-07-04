@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from poolink_backend.apps.board.models import Board
+from poolink_backend.apps.board.models import Board, Category
 
 
 @admin.register(Board)
