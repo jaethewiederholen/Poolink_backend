@@ -8,4 +8,5 @@ class CategorySerializer(ModelSerializer):
         fields = (
             "name",
             "image",
+            "color",
         )

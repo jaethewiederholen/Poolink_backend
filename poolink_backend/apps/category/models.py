@@ -20,6 +20,12 @@ class Category(Model):
         help_text=_("카테고리의 이미지입니다."),
         null=False
     )
+    color = models.CharField(
+        max_length=20,
+        verbose_name=_("카테고리 색상"),
+        help_text=_("카테고리의 색상코드입니다."),
+        null=True
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("카테고리")
