@@ -10,6 +10,7 @@ from poolink_backend.bases.models import Model
 
 
 class UserManager(BaseUserManager):
+
     use_in_migrations = True
 
     def create_user(
@@ -21,6 +22,7 @@ class UserManager(BaseUserManager):
             raise ValueError("must have user password")
         user = self.model(
             email=self.normalize_email(email), username=username, name=name
+
         )
         user.set_password(password)
         user.save(using=self._db)
