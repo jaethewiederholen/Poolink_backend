@@ -104,3 +104,10 @@ class User(AbstractBaseUser, Model, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_superuser
+
+
+class Path(Model):
+    path = models.TextField(
+        verbose_name=_("알게된 경로"),
+        help_text=_("알게된 경로"),
+    )
