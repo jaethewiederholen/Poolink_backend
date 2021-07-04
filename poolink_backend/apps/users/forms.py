@@ -1,19 +1,20 @@
-from django.contrib.auth import forms as admin_forms
-from django.contrib.auth import get_user_model
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import gettext_lazy as _
 
-User = get_user_model()
+from poolink_backend.apps.users.models import User
 
 
-class UserChangeForm(admin_forms.UserChangeForm):
-    class Meta(admin_forms.UserChangeForm.Meta):
+class UserChangeForm(UserChangeForm):
+    class Meta(UserChangeForm):
         model = User
+        fields = ("username", "name", "email")
 
 
-class UserCreationForm(admin_forms.UserCreationForm):
-    class Meta(admin_forms.UserCreationForm.Meta):
+class UserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm):
         model = User
-
+        fields = ("username", "name", "email")
         error_messages = {
-            "username": {"unique": _("This username has already been taken.")}
+            "username": {"unique": _("This username has already been taken.")},
+            "email": {"unique": _("This email has already been taken.")},
         }
