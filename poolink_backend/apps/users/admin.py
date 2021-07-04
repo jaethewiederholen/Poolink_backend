@@ -21,6 +21,7 @@ class UserAdmin(auth_admin.UserAdmin):
                     "username",
                     "password",
                     "email",
+                    "prefer",
                 )
             },
         ),
@@ -41,7 +42,7 @@ class UserAdmin(auth_admin.UserAdmin):
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('username', 'email', 'name', 'password1', 'password2')}
+            'fields': ('username', 'email', 'name', 'password1', 'password2', 'prefer')}
          ),
     )
     list_filter = ("is_superuser",)

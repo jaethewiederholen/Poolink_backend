@@ -7,6 +7,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from poolink_backend.bases.models import Model
+from poolink_backend.apps.category.models import Category
 
 
 class UserManager(BaseUserManager):
@@ -76,6 +77,12 @@ class User(AbstractBaseUser, Model, PermissionsMixin):
         null=False,
         max_length=70,
         unique=True,
+    )
+    prefer = models.ManyToManyField(
+        Category,
+        related_name="prefer_category",
+        null=True,
+        blank=True,
     )
     is_active = models.BooleanField(verbose_name=_("Is active"), default=True)
 
