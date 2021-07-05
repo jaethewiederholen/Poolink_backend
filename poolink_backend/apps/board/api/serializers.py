@@ -5,8 +5,4 @@ from poolink_backend.bases.api.serializers import ModelSerializer
 class BoardSerializer(ModelSerializer):
     class Meta:
         model = Board
-        fields = (
-            "name",
-            "image",
-            "bio",
-        )
+        fields = ['name', 'bio', 'image', 'user']

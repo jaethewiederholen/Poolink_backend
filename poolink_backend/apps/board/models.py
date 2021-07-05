@@ -43,15 +43,9 @@ class Board(Model):
         null=False,
         default=False,
     )
-    # like_count = models.IntegerField(
-    #     verbose_name=_("좋아요 수"), help_text=_("보드의 좋아요 수를 나타냅니다.")
-    # )
-    # scrap_count = models.IntegerField(
-    #     verbose_name=_("스크랩 수"), help_text=_("보드가 스크랩 된 수를 나타냅니다.")
-    # )
-    like = models.ManyToManyField(User, related_name="like")
-    scrap = models.ManyToManyField(User, related_name="scrap")
-    category = models.ManyToManyField(Category, related_name="board_category")
+    like = models.ManyToManyField(User, related_name="like", null=True,)
+    scrap = models.ManyToManyField(User, related_name="scrap", null=True,)
+    category = models.ManyToManyField(Category, related_name="board_category", null=True,)
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")

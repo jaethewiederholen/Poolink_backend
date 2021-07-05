@@ -6,7 +6,7 @@ from drf_yasg import openapi
 from drf_yasg.views import get_schema_view
 
 schema_url_patterns = [
-    path(r"^api/v1/", include("config.api_router")),
+    path(r"^api/", include("config.api_router")),
 ]
 
 schema_view = get_schema_view(

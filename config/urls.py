@@ -8,7 +8,7 @@ from django.views.generic import TemplateView
 from rest_framework.authtoken.views import obtain_auth_token
 
 from config.docs import schema_view
-from config.redirects import redirect_admin_view, redirect_swagger_view
+from config.redirects import redirect_admin_view
 
 urlpatterns = [
     path("", redirect_admin_view),
@@ -29,7 +29,7 @@ if settings.DEBUG:
 # API URLS
 urlpatterns += [
     # API base url
-    path("api/", redirect_swagger_view),
+    path("api/", include("config.api_router")),
     # DRF auth token
     path("auth-token/", obtain_auth_token),
     re_path(
