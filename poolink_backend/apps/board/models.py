@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from poolink_backend.bases.models import Model
-from poolink_backend.apps.users.models import User
 from poolink_backend.apps.category.models import Category
+from poolink_backend.apps.users.models import User
+from poolink_backend.bases.models import Model
 
 
 class BoardManager(models.Manager):
@@ -56,11 +56,14 @@ class Board(Model):
     class Meta:
         verbose_name = verbose_name_plural = _("보드")
 
+    @property
     def like_count(self):
         return self.like.count()
 
+    @property
     def scrap_count(self):
         return self.scrap.count()
 
+    @property
     def __str__(self):
         return self.name
