@@ -9,5 +9,4 @@ class BoardSerializer(ModelSerializer):
             "name",
             "image",
             "bio",
-            "scrap_count",
         )
