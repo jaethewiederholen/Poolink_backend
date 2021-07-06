@@ -1,8 +1,9 @@
 from django.urls import path
 
-from .api.views import partial_board_view
+from .api.views import my_board_view, scrap_board_view
 
 app_name = "board"
 urlpatterns = [
-    path("partial", view=partial_board_view),
+    path("my", view=my_board_view),
+    path("scrap", view=scrap_board_view),
 ]

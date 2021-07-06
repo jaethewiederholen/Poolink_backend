@@ -6,8 +6,14 @@ class LinkSerializer(ModelSerializer):
     class Meta:
         model = Link
         fields = (
+            "favicon",
             "board",
             "label",
             "url",
-            "show",
         )
+
+
+class DetailLinkSerializer(ModelSerializer):
+    class Meta:
+        model = Link
+        fields = '__all__'
