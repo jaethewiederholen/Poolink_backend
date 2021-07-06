@@ -58,6 +58,5 @@ class Board(Model):
     def scrap_count(self):
         return self.scrap.count()
 
-    @property
     def __str__(self):
         return self.name
