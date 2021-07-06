@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter, SimpleRouter
 
 from poolink_backend.apps.board.api.views import BoardViewSet
@@ -17,4 +18,5 @@ router.register("board", BoardViewSet)
 app_name = "api"
 urlpatterns = [
     # 기존 viewset 으로 만들어진 것이 아닌 view 들
+    path("board/", include("poolink_backend.apps.board.urls")),
 ] + router.urls
