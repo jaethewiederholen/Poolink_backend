@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from poolink_backend.bases.models import Model
-from poolink_backend.apps.users.models import User
 from poolink_backend.apps.category.models import Category
+from poolink_backend.apps.users.models import User
+from poolink_backend.bases.models import Model
 
 
 class BoardManager(models.Manager):
@@ -43,24 +43,21 @@ class Board(Model):
         null=False,
         default=False,
     )
-    # like_count = models.IntegerField(
-    #     verbose_name=_("좋아요 수"), help_text=_("보드의 좋아요 수를 나타냅니다.")
-    # )
-    # scrap_count = models.IntegerField(
-    #     verbose_name=_("스크랩 수"), help_text=_("보드가 스크랩 된 수를 나타냅니다.")
-    # )
-    like = models.ManyToManyField(User, related_name="like")
-    scrap = models.ManyToManyField(User, related_name="scrap")
-    category = models.ManyToManyField(Category, related_name="board_category")
+    like = models.ManyToManyField(User, related_name="like", null=True,)
+    scrap = models.ManyToManyField(User, related_name="scrap", null=True,)
+    category = models.ManyToManyField(Category, related_name="board_category", null=True,)
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")
 
+    @property
     def like_count(self):
         return self.like.count()
 
+    @property
     def scrap_count(self):
         return self.scrap.count()
 
+    @property
     def __str__(self):
         return self.name
