@@ -4,12 +4,12 @@
 # from rest_framework.response import Response
 # from rest_framework.status import HTTP_200_OK
 
-from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.link.api.serializers import LinkSerializer
 # from poolink_backend.bases.api.views import APIView as BaseAPIView
+from poolink_backend.apps.link.models import Link
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
 class LinkViewSet(ModelViewSet):
     serializer_class = LinkSerializer
-    queryset = Board.objects.all()
+    queryset = Link.objects.all()

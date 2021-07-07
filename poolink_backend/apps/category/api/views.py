@@ -7,9 +7,9 @@ from rest_framework.views import APIView as BaseAPIView
 
 from poolink_backend.apps.category.api.serializers import CategorySerializer
 from poolink_backend.apps.category.models import Category
+from poolink_backend.apps.users.api.serializers import UserSerializer
 from poolink_backend.bases.api.viewsets import ModelViewSet
-
-from rest_framework import decorators
+from rest_framework import decorators, status
 
 
 class CategoryList(BaseAPIView):
@@ -24,3 +24,20 @@ class CategoryList(BaseAPIView):
         serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
 
+
+# class CategorySelectView(BaseAPIView):
+#     @swagger_auto_schema(
+#         operation_id=_("Select Prefer-Category"),
+#         operation_description=_("유저가 선호하는 카테고리를 추가/삭제하는 뷰입니다."),
+#         responses={200: openapi.Response(_("OK"), CategorySerializer, )},
+#         tags=[_("선호 카테고리"), ],
+#     )
+#     def post(self, request, format=None):
+#         user = self.request.user
+#         prefer_categories = Category.objects.get(name=request.data['name'])
+#         serializer = UserSerializer(prefer_categories, many=True)
+#         user.prefer.add(serializer)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data, status=status.HTTP_201_CREATED)
+#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
