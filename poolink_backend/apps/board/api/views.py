@@ -2,12 +2,14 @@ from django.shortcuts import get_object_or_404
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 
 from poolink_backend.apps.board.api.serializers import (
     BoardSerializer,
+    PartialBoardSerializer,
     MyBoardSerializer,
     ScrapBoardSerializer,
 )
@@ -22,11 +24,27 @@ class BoardViewSet(ModelViewSet):
     queryset = Board.objects.all()
     # filterset_fields = ["name"]
 
+# 이렇게 뷰셋에서 create 오버라이딩하면 request 해당 유저 보드 생성 가능한가? (출처 https://www.valentinog.com/blog/drf-request/)
+#     def create(self, request, *args, **kwargs):
+#         request.data['user'] = request.user.id
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         self.perform_create(serializer)
+#         headers = self.get_success_headers(serializer.data)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     @action(detail=True, methods=['get'])
     def categories(self, request, pk):
         board = get_object_or_404(Board, pk=pk)
         categories = board.category.all()
         serializer = CategorySerializer(categories, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False)
+    def partial(self, request):
+        user = self.request.user
+        board = Board.objects.filter(user_id=user.id)
+        serializer = PartialBoardSerializer(board, many=True)
         return Response(serializer.data)
 
 
