@@ -22,7 +22,7 @@ from poolink_backend.bases.api.viewsets import ModelViewSet
 class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
-    # filterset_fields = ["name"]
+    filterset_fields = ["name"]
 
 # 이렇게 뷰셋에서 create 오버라이딩하면 request 해당 유저 보드 생성 가능한가? (출처 https://www.valentinog.com/blog/drf-request/)
 #     def create(self, request, *args, **kwargs):
