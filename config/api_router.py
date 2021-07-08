@@ -19,5 +19,6 @@ router.register("link", LinkViewSet)
 app_name = "api"
 urlpatterns = [
     # 기존 viewset 으로 만들어진 것이 아닌 view 들
-    path("board/", include("poolink_backend.apps.board.urls")),
+    path("board", include("poolink_backend.apps.board.urls")),
+    path("link", include("poolink_backend.apps.link.urls")),
 ] + router.urls

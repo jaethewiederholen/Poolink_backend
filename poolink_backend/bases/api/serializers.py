@@ -1,3 +1,4 @@
+from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 
@@ -21,3 +22,7 @@ class ModelSerializer(serializers.ModelSerializer):
             pass
 
         return self.Meta.model.objects.create(**validated_data)
+
+
+class MessageSerializer(serializers.Serializer):
+    message = serializers.CharField(read_only=True, help_text=_("Detailed response from server"))
