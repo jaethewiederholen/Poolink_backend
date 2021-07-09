@@ -20,4 +20,5 @@ app_name = "api"
 urlpatterns = [
     # 기존 viewset 으로 만들어진 것이 아닌 view 들
     path("board/", include("poolink_backend.apps.board.urls")),
+    path("category/", include("poolink_backend.apps.category.urls")),
 ] + router.urls
