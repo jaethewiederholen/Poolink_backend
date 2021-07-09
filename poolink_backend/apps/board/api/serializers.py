@@ -14,6 +14,12 @@ class BoardSerializer(ModelSerializer):
         fields = ['name', 'image', 'user', 'links', 'bio', 'scrap', 'category', 'scrap_count', 'links']
 
 
+class PartialBoardSerializer(ModelSerializer):
+    class Meta:
+        model = Board
+        fields = ['name', 'image']
+
+
 class MyBoardSerializer(ModelSerializer):
     links = LinkSerializer(many=True, read_only=True)
 
