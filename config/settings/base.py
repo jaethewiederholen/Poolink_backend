@@ -67,6 +67,7 @@ DJANGO_APPS = [
     "django.forms",
     "drf_yasg",
     "django_filters",
+
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
