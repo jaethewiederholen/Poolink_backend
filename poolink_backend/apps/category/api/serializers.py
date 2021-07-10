@@ -1,9 +1,6 @@
 from rest_framework import serializers
 
 from poolink_backend.apps.category.models import Category
-from poolink_backend.apps.board.api.serializers import (
-    BoardSerializer
-)
 from poolink_backend.bases.api.serializers import ModelSerializer
 
 
@@ -14,7 +11,7 @@ class CategorySerializer(ModelSerializer):
 
 
 class CategorySelectSerializer(serializers.Serializer):
-    categories = serializers.ListField(
+    category = serializers.ListField(
         child=serializers.IntegerField(min_value=0, max_value=Category.objects.latest('id').id),
         write_only=True,
     )
