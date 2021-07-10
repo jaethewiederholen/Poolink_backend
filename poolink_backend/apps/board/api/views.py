@@ -73,8 +73,10 @@ class MyBoardView(BaseAPIView):
     def get(self, request):
         user = self.request.user
         my_board = Board.objects.filter(user_id=user.id)
+        scrapped_board = self.request.user.scrap.all()
+        boards = my_board | scrapped_board
 
-        return Response(status=HTTP_200_OK, data=MyBoardSerializer(my_board, many=True).data)
+        return Response(status=HTTP_200_OK, data=MyBoardSerializer(boards, many=True).data)
 
     @swagger_auto_schema(
         operation_id=_("Create My Board"),
@@ -119,6 +121,7 @@ my_board_view = MyBoardView.as_view()
 class ScrapBoardView(BaseAPIView):
     allowed_method = ("GET", "DELETE", "POST")
 
+    '''
     @swagger_auto_schema(
         operation_id=_("Get Scrap Board"),
         operation_description=_("저장 페이지에 보여질 스크랩 보드들 입니다."),
@@ -130,6 +133,7 @@ class ScrapBoardView(BaseAPIView):
         data = MyBoardSerializer(scrapped_board, many=True).data
 
         return Response(status=HTTP_200_OK, data=data)
+    '''
 
     @swagger_auto_schema(
         operation_id=_("Scrap Board"),
