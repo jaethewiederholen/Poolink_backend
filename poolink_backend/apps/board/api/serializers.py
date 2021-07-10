@@ -10,13 +10,13 @@ class BoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['id', 'name', 'image', 'user', 'links', 'bio', 'scrap', 'category', 'scrap_count', 'links']
+        fields = ['id', 'name', 'image', 'user', 'links', 'category', 'scrap']
 
 
 class PartialBoardSerializer(ModelSerializer):
     class Meta:
         model = Board
-        fields = ['name', 'image']
+        fields = ['id', 'name', 'image']
 
 
 class MyBoardSerializer(ModelSerializer):
@@ -24,19 +24,24 @@ class MyBoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['id', 'name', 'image', 'user', 'links']
+        fields = ['id', 'name', 'image', 'user', 'links', 'category', 'scrap']
 
 
-class ScrapBoardSerializer(ModelSerializer):
-    links = LinkSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = Board
-        fields = ['name', 'image', 'user', 'links']
+class ScrapBoardSerializer(serializers.Serializer):
+    board_to_scrap = serializers.IntegerField(
+        min_value=0, max_value=Board.objects.latest('id').id, write_only=True,
+    )
 
 
 class BoardDestroySerializer(serializers.Serializer):
     boards = serializers.ListField(
         child=serializers.IntegerField(min_value=0, max_value=Board.objects.latest('id').id),
+        write_only=True,
+    )
+
+
+class ScrapBoardDestroySerializer(serializers.Serializer):
+    scrap_boards = serializers.ListField(
+        child=serializers.IntegerField(min_value=0, max_value=Board.scrap.through.objects.latest('id').id),
         write_only=True,
     )
