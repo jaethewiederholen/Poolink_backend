@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
 from poolink_backend.apps.board.api.serializers import (
+    BoardCreateSerializer,
     BoardDestroySerializer,
     BoardSerializer,
     MyBoardSerializer,
@@ -81,13 +82,13 @@ class MyBoardView(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Create My Board"),
         operation_description=_("보드를 추가합니다."),
-        request_body=MyBoardSerializer,
+        request_body=BoardCreateSerializer,
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("내 보드"), ],
     )
     def post(self, request):
         request.data['user'] = request.user.id
-        serializer = MyBoardSerializer(data=request.data)
+        serializer = BoardCreateSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             new_board = serializer.save()
             data = {"id": new_board.id}
