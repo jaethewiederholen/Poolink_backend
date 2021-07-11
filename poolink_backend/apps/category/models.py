@@ -18,13 +18,15 @@ class Category(Model):
         upload_to='media',
         verbose_name=_("카테고리 이미지"),
         help_text=_("카테고리의 이미지입니다."),
-        null=False
+        null=True,
+        blank=True
     )
     color = models.CharField(
         max_length=20,
         verbose_name=_("카테고리 색상"),
         help_text=_("카테고리의 색상코드입니다."),
-        null=True
+        null=True,
+        blank=True
     )
 
     class Meta:
