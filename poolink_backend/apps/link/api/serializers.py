@@ -11,8 +11,12 @@ class LinkSerializer(ModelSerializer):
 
 
 class LinkDestroySerializer(serializers.Serializer):
+    try:
+        latest = Link.objects.latest('id').id
+    except Link.DoesNotExist:
+        latest = 0
     links = serializers.ListField(
-        child=serializers.IntegerField(min_value=0, max_value=Link.objects.latest('id').id),
+        child=serializers.IntegerField(min_value=0, max_value=latest),
         write_only=True,
     )
 
