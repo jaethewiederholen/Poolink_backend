@@ -1,4 +1,4 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, logout
 from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
@@ -113,3 +113,14 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
     def me(self, request):
         serializer = UserSerializer(request.user, context={"request": request})
         return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+    @action(detail=False, methods=["POST"])
+    def logout(self, request):
+        logout(request.user)
+        return Response("로그아웃 완료")
+
+    @action(detail=False, methods=["DELETE"])
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        logout(user)
