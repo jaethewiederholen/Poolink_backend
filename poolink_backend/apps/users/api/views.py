@@ -17,12 +17,13 @@ from allauth.socialaccount.providers.google import views as google_view
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from django.http import JsonResponse
 import requests
-from rest_framework import status
 from json.decoder import JSONDecodeError
 
 state = settings.STATE
 BASE_URL = 'http://localhost:8000/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'google/callback/'
+
+
 def google_login(request):
     """
     Code Request
@@ -30,6 +31,8 @@ def google_login(request):
     scope = "https://www.googleapis.com/auth/userinfo.email"
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
     return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?client_id={client_id}&response_type=code&redirect_uri={GOOGLE_CALLBACK_URI}&scope={scope}")
+
+
 def google_callback(request):
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
     client_secret = settings.SOCIAL_AUTH_GOOGLE_SECRET
@@ -70,7 +73,7 @@ def google_callback(request):
         # 기존에 Google로 가입된 유저
         data = {'access_token': access_token, 'code': code}
         accept = requests.post(
-            f"{BASE_URL}/google/login/finish/", data=data)
+            f"{BASE_URL}google/login/finish/", data=data)
         accept_status = accept.status_code
         if accept_status != 200:
             return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
@@ -82,7 +85,7 @@ def google_callback(request):
         data = {'access_token': access_token, 'code': code}
         print("토큰 ", access_token, "코드 ", code)
         accept = requests.post(
-            f"{BASE_URL}/google/login/finish/", data=data)
+            f"{BASE_URL}google/login/finish/", data=data)
         accept_status = accept.status_code
         if accept_status != 200:
             return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
@@ -90,6 +93,8 @@ def google_callback(request):
         print(accept_json)
         accept_json.pop('user', None)
         return JsonResponse(accept_json)
+
+
 class GoogleLogin(SocialLoginView):
     adapter_class = google_view.GoogleOAuth2Adapter
     callback_url = GOOGLE_CALLBACK_URI
