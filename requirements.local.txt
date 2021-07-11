@@ -81,7 +81,6 @@ lockfile==0.12.2
 MarkupSafe==1.1.1
 matplotlib-inline==0.1.2
 mccabe==0.6.1
-more-itertools @ file:///C:/Users/%EC%B5%9C%EC%98%88%EC%9B%90/AppData/Local/pypoetry/Cache/artifacts/62/3d/33/5a8bb7d6560ecb8d24e4a729b3531da94e59535c990304fa6500d27689/more_itertools-8.8.0-py3-none-any.whl
 msgpack==1.0.2
 mypy==0.901
 mypy-extensions==0.4.3
