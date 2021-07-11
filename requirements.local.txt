@@ -150,7 +150,6 @@ timeago==1.0.15
 toml==0.10.2
 tomlkit==0.7.2
 tornado==6.1
-tqdm @ file:///C:/Users/%EC%B5%9C%EC%98%88%EC%9B%90/AppData/Local/pypoetry/Cache/artifacts/6c/33/d5/48c339dfc98e42f0a0b83bf80fea8c8af5f1b732a0ff26026986977a88/tqdm-4.61.1-py2.py3-none-any.whl
 traitlets==5.0.5
 typing-extensions==3.10.0.0
 uritemplate==3.0.1
