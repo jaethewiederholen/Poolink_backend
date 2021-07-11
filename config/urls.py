@@ -9,6 +9,7 @@ from rest_framework.authtoken.views import obtain_auth_token
 
 from config.docs import schema_view
 from config.redirects import redirect_admin_view
+from poolink_backend.apps.users.api import views
 
 urlpatterns = [
     path("", redirect_admin_view),
@@ -19,7 +20,12 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("poolink_backend.apps.users.urls", namespace="users")),
-    path("accounts/", include("allauth.urls")),
+    path("users/", include("allauth.urls")),
+    path('users/', include('dj_rest_auth.urls')),
+    path('users/', include('dj_rest_auth.registration.urls')),
+    path('google/login', views.google_login, name='google_login'),
+    path('google/callback/', views.google_callback, name='google_callback'),
+    path('google/login/finish/', views.GoogleLogin.as_view(), name='google_login_todjango'),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
