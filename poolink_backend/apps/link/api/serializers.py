@@ -15,3 +15,12 @@ class LinkDestroySerializer(serializers.Serializer):
         child=serializers.IntegerField(min_value=0, max_value=Link.objects.latest('id').id),
         write_only=True,
     )
+
+
+class LinkSearchSerializer(serializers.Serializer):
+    text = serializers.CharField(
+        max_length=None,
+        min_length=None,
+        allow_blank=True,
+        trim_whitespace=True
+    )
