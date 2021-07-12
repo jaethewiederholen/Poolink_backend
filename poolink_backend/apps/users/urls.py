@@ -1,10 +1,12 @@
 from django.urls import path
-from poolink_backend.apps.users.api import views
+
 from poolink_backend.apps.users.views import (
     user_detail_view,
     user_redirect_view,
     user_update_view,
 )
+
+from .api.views import google_login_view
 
 app_name = "users"
 urlpatterns = [
@@ -14,4 +16,5 @@ urlpatterns = [
     path("~redirect/", view=user_redirect_view, name="redirect"),
     path("~update/", view=user_update_view, name="update"),
     path("<str:username>/", view=user_detail_view, name="detail"),
+    path("/googlelogin", google_login_view),
 ]
