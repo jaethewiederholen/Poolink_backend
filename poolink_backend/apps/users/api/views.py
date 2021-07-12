@@ -1,27 +1,65 @@
-from django.contrib.auth import get_user_model, logout
-from rest_framework import status
-from rest_framework.decorators import action
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from json.decoder import JSONDecodeError
 
-from .serializers import UserSerializer
-
-from django.shortcuts import redirect
-from config.settings import base as settings
-from poolink_backend.apps.users.models import User
+import requests
 from allauth.socialaccount.models import SocialAccount
-# from django.conf import settings
-from dj_rest_auth.registration.views import SocialLoginView
 from allauth.socialaccount.providers.google import views as google_view
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+# from django.conf import settings
+from dj_rest_auth.registration.views import SocialLoginView
+from django.contrib.auth import logout
 from django.http import JsonResponse
-import requests
-from json.decoder import JSONDecodeError
+from django.shortcuts import redirect
+from django.utils.translation import ugettext_lazy as _
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
+from rest_framework.decorators import action, api_view
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.response import Response
+from rest_framework.status import HTTP_200_OK
+from rest_framework.viewsets import GenericViewSet
+
+from config.settings import base as settings
+from poolink_backend.apps.users.api.serializers import (
+    GoogleLoginSerializer,
+    UserLoginSuccessSerializer,
+)
+from poolink_backend.apps.users.models import User
+
+from .serializers import UserSerializer
 
 state = settings.STATE
 BASE_URL = 'http://localhost:8000/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'google/callback/'
+
+
+@swagger_auto_schema(
+    method="POST",
+    operation_id="users-login-google",
+    operation_description=_(""),
+    request_body=GoogleLoginSerializer,
+    responses={
+        HTTP_200_OK: UserLoginSuccessSerializer,
+    },
+    tags=[_("로그인")],
+)
+@api_view(("POST",))
+def google_login_view(request):
+    serializer = GoogleLoginSerializer(data=request.data)
+    if serializer.is_valid(raise_exception=True):
+        access_token = serializer.validated_data["access_token"]
+        email_req = requests.get(
+            f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
+        email_req_status = email_req.status_code
+
+        if email_req_status != 200:
+            return Response({'err_msg': 'failed to get email'}, status=status.HTTP_400_BAD_REQUEST)
+        email_req_json = email_req.json()
+        email = email_req_json.get('email')
+
+        user, created = User.objects.update_or_create(
+            email=email,
+        )
+        return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
 
 
 def google_login(request):
@@ -30,7 +68,8 @@ def google_login(request):
     """
     scope = "https://www.googleapis.com/auth/userinfo.email"
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
-    return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?client_id={client_id}&response_type=code&redirect_uri={GOOGLE_CALLBACK_URI}&scope={scope}")
+    return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?client_id="
+                    f"{client_id}&response_type=code&redirect_uri={GOOGLE_CALLBACK_URI}&scope={scope}")
 
 
 def google_callback(request):
@@ -41,7 +80,8 @@ def google_callback(request):
     Access Token Request
     """
     token_req = requests.post(
-        f"https://oauth2.googleapis.com/token?client_id={client_id}&client_secret={client_secret}&code={code}&grant_type=authorization_code&redirect_uri={GOOGLE_CALLBACK_URI}&state={state}")
+        f"https://oauth2.googleapis.com/token?client_id={client_id}&client_secret="
+        f"{client_secret}&code={code}&grant_type=authorization_code&redirect_uri={GOOGLE_CALLBACK_URI}&state={state}")
     token_req_json = token_req.json()
     error = token_req_json.get("error")
     if error is not None:
@@ -98,13 +138,10 @@ class GoogleLogin(SocialLoginView):
     client_class = OAuth2Client
 
 
-User = get_user_model()
-
-
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    lookup_field = "username"
+    lookup_field = "id"
 
     # def get_queryset(self, *args, **kwargs):
     #     return self.queryset.filter(id=self.request.user.id)
