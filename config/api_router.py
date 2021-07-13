@@ -13,14 +13,14 @@ else:
 
 # base 의 viewset 으로 만들어진 view 들
 router.register("users", UserViewSet)
-router.register("board", BoardViewSet)
-router.register("link", LinkViewSet)
+router.register("boards", BoardViewSet)
+router.register("links", LinkViewSet)
 
 app_name = "api"
 urlpatterns = [
     # 기존 viewset 으로 만들어진 것이 아닌 view 들s
-    path("board", include("poolink_backend.apps.board.urls")),
-    path("link", include("poolink_backend.apps.link.urls")),
-    path("category", include("poolink_backend.apps.category.urls")),
+    path("boards", include("poolink_backend.apps.board.urls")),
+    path("links", include("poolink_backend.apps.link.urls")),
+    path("categories", include("poolink_backend.apps.category.urls")),
 
 ] + router.urls
