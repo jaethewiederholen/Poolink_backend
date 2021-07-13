@@ -22,5 +22,6 @@ urlpatterns = [
     path("boards", include("poolink_backend.apps.board.urls")),
     path("links", include("poolink_backend.apps.link.urls")),
     path("categories", include("poolink_backend.apps.category.urls")),
+    path("users", include("poolink_backend.apps.users.urls")),
 
 ] + router.urls

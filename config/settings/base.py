@@ -1,6 +1,9 @@
 """
 Base settings to build other settings files upon.
 """
+# Your stuff...
+# ------------------------------------------------------------------------------
+from datetime import timedelta
 from pathlib import Path
 
 import environ
@@ -46,9 +49,6 @@ DATABASES = {
 }
 DATABASES["default"]["ATOMIC_REQUESTS"] = True
 
-SOCIAL_AUTH_GOOGLE_CLIENT_ID = "173501864368-bu7fcnbc56ccsbl9sin5evkte1gvh4kf.apps.googleusercontent.com"
-SOCIAL_AUTH_GOOGLE_SECRET = "viBu_KR2I1fwFZmxk8qc8lQ1"
-STATE = "random_string"
 
 # URLS
 # ------------------------------------------------------------------------------
@@ -304,9 +304,6 @@ REST_FRAMEWORK = {
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
-# Your stuff...
-# ------------------------------------------------------------------------------
-from datetime import timedelta
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
@@ -314,3 +311,8 @@ SIMPLE_JWT = {
     # 'BLACKLIST_AFTER_ROTATION': True,
 }
 
+
+# Google Login
+SOCIAL_AUTH_GOOGLE_CLIENT_ID = env("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
+SOCIAL_AUTH_GOOGLE_SECRET = env("SOCIAL_AUTH_GOOGLE_SECRET")
+STATE = env("STATE")
