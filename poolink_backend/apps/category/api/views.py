@@ -36,7 +36,7 @@ class CategorySelectView(BaseAPIView):
     )
     def post(self, request, format=None):
         user = self.request.user
-        serializer = CategorySelectSerializer(data=request.data)
+        serializer = CategorySelectSerializer(data=request.data,)
         if serializer.is_valid(raise_exception=True):
             before_category_id = []
             for i in range(len(user.prefer.through.objects.all())):

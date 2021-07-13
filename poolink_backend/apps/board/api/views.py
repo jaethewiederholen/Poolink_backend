@@ -1,9 +1,8 @@
-
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+# from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -122,20 +121,6 @@ my_board_view = MyBoardView.as_view()
 
 class ScrapBoardView(BaseAPIView):
     allowed_method = ("GET", "DELETE", "POST")
-
-    '''
-    @swagger_auto_schema(
-        operation_id=_("Get Scrap Board"),
-        operation_description=_("저장 페이지에 보여질 스크랩 보드들 입니다."),
-        responses={200: openapi.Response(_("OK"), MyBoardSerializer)},
-        tags=[_("스크랩 보드"), ],
-    )
-    def get(self, request):
-        scrapped_board = self.request.user.scrap.all()
-        data = MyBoardSerializer(scrapped_board, many=True).data
-
-        return Response(status=HTTP_200_OK, data=data)
-    '''
 
     @swagger_auto_schema(
         operation_id=_("Scrap Board"),
