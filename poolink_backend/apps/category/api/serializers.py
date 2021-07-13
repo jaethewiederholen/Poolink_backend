@@ -11,7 +11,11 @@ class CategorySerializer(ModelSerializer):
 
 
 class CategorySelectSerializer(serializers.Serializer):
+    try:
+        latest = Category.objects.latest('id').id
+    except Category.DoesNotExist:
+        latest = 0
     category = serializers.ListField(
-        child=serializers.IntegerField(min_value=0, max_value=Category.objects.latest('id').id),
+        child=serializers.IntegerField(min_value=0, max_value=latest),
         write_only=True,
     )

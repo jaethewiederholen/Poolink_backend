@@ -5,9 +5,10 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from rest_framework.authtoken.models import Token
 
-from poolink_backend.bases.models import Model
 from poolink_backend.apps.category.models import Category
+from poolink_backend.bases.models import Model
 
 
 class UserManager(BaseUserManager):
@@ -104,6 +105,14 @@ class User(AbstractBaseUser, Model, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_superuser
+
+    @property
+    def token(self):
+        try:
+            token, created = Token.objects.get_or_create(user=self)
+            return token
+        except Token.DoesNotExist:
+            return None
 
 
 class Path(Model):

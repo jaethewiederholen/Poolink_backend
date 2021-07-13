@@ -16,9 +16,13 @@ class BoardSerializer(ModelSerializer):
 
 
 class BoardCreateSerializer(ModelSerializer):
+    try:
+        latest = Category.objects.latest('id').id
+    except Category.DoesNotExist:
+        latest = 0
     category = serializers.ListSerializer(
         child=serializers.IntegerField(
-            min_value=0, max_value=Category.objects.latest('id').id), write_only=True,)
+            min_value=0, max_value=latest), write_only=True,)
 
     class Meta:
         model = Board
