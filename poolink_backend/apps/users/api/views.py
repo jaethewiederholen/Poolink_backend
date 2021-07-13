@@ -7,7 +7,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from .serializers import UserSerializer
 
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from config.settings import base as settings
 from poolink_backend.apps.users.models import User
 from allauth.socialaccount.models import SocialAccount
@@ -104,23 +104,22 @@ User = get_user_model()
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    lookup_field = "username"
+    # lookup_field = "id"
 
     # def get_queryset(self, *args, **kwargs):
     #     return self.queryset.filter(id=self.request.user.id)
+
+    def destroy(self, request, pk, *args, **kwargs):
+        user = get_object_or_404(User, pk=pk)
+        user.delete()
+        return Response("회원탈퇴 완료")
 
     @action(detail=False, methods=["GET"])
     def me(self, request):
         serializer = UserSerializer(request.user, context={"request": request})
         return Response(status=status.HTTP_200_OK, data=serializer.data)
 
-    @action(detail=False, methods=["POST"])
-    def logout(self, request):
-        logout(request.user)
+    @action(detail=True, methods=["POST"])
+    def logout(self, request, pk):
+        logout(request)
         return Response("로그아웃 완료")
-
-    @action(detail=False, methods=["DELETE"])
-    def delete(self, request):
-        user = request.user
-        user.delete()
-        logout(user)
