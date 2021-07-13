@@ -327,7 +327,7 @@ poolink_backend/media/
 .pytest_cache/
 
 #env file
-.env
+# .env
 
 # pre-commit file
 .pre-commit-config.yaml

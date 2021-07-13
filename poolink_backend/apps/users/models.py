@@ -35,6 +35,7 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
             username=username,
             name=name,
+            password=extra_fields['password'],
         )
         user.is_admin = True
         user.is_superuser = True
