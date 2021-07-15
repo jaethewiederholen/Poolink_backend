@@ -3,6 +3,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 # from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -55,6 +56,12 @@ class BoardViewSet(ModelViewSet):
     #         return HttpResponse(result)
 
     @action(detail=False)
+    @swagger_auto_schema(
+        operation_id=_("Get My Board Partial Info"),
+        operation_description=_("사이드바에 보여질 보드들 입니다."),
+        responses={200: openapi.Response(_("OK"), PartialBoardSerializer, )},
+        tags=[_("내 보드"), ],
+    )
     def partial(self, request):
         user = self.request.user
         board = Board.objects.filter(user_id=user.id)
@@ -68,16 +75,20 @@ class MyBoardView(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Get My Board"),
         operation_description=_("저장 페이지에 보여질 보드들 입니다."),
+        manual_parameters=[
+            openapi.Parameter('page', openapi.IN_QUERY, type='integer')],
         responses={200: openapi.Response(_("OK"), MyBoardSerializer,)},
         tags=[_("내 보드"), ],
     )
     def get(self, request):
+        paginator = PageNumberPagination()
         user = self.request.user
         my_board = Board.objects.filter(user_id=user.id)
         scrapped_board = self.request.user.scrap.all()
         boards = my_board | scrapped_board
+        result = paginator.paginate_queryset(boards, request)
 
-        return Response(status=HTTP_200_OK, data=MyBoardSerializer(boards, many=True).data)
+        return Response(status=HTTP_200_OK, data=MyBoardSerializer(result, many=True).data)
 
     @swagger_auto_schema(
         operation_id=_("Create My Board"),
