@@ -10,6 +10,7 @@ from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import (
@@ -20,7 +21,7 @@ from rest_framework.decorators import (
 )
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 from rest_framework.viewsets import GenericViewSet
 
 from config.settings import base as settings
@@ -29,6 +30,8 @@ from poolink_backend.apps.users.api.serializers import (
     UserLoginSuccessSerializer,
 )
 from poolink_backend.apps.users.models import User
+from poolink_backend.bases.api.serializers import MessageSerializer
+from poolink_backend.bases.api.views import APIView as BaseAPIView
 
 from .serializers import UserSerializer
 
@@ -152,17 +155,41 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
     # def get_queryset(self, *args, **kwargs):
     #     return self.queryset.filter(id=self.request.user.id)
 
-    def destroy(self, request, pk, *args, **kwargs):
-        user = get_object_or_404(User, pk=pk)
-        user.delete()
-        return Response("회원탈퇴 완료")
-
     # @action(detail=False, methods=["GET"])
     # def me(self, request):
     #     serializer = UserSerializer(request.user, context={"request": request})
     #     return Response(status=status.HTTP_200_OK, data=serializer.data)
 
-    @action(detail=True, methods=["POST"])
-    def logout(self, request, pk):
+
+class UserLogoutView(BaseAPIView):
+    allowed_method = "POST"
+
+    @swagger_auto_schema(
+        operation_id=_("Logout User"),
+        operation_description=_("유저 로그아웃"),
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+        tags=[_("로그아웃, 탈퇴"), ],
+    )
+    def post(self, request):
         logout(request)
-        return Response("로그아웃 완료")
+        return Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
+
+
+class UserDeleteView(BaseAPIView):
+    allowed_method = "DELETE"
+
+    @swagger_auto_schema(
+        operation_id=_("Delete User"),
+        operation_description=_("회원 탈퇴 - 현재 요청을 보내는 유저를 삭제합니다."),
+        responses={204: openapi.Response(_("OK"), MessageSerializer)},
+        tags=[_("로그아웃, 탈퇴"), ],
+    )
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("유저를 삭제했습니다.")}).data)
+
+
+user_logout_view = UserLogoutView.as_view()
+user_delete_view = UserDeleteView.as_view()
+
