@@ -44,6 +44,7 @@ class Link(Model):
 
     class Meta:
         verbose_name = verbose_name_plural = _("링크")
+        ordering = ['-id']
 
     def __str__(self):
         return self.label
