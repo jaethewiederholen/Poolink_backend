@@ -35,6 +35,7 @@ class LinkView(BaseAPIView):
     )
     def get(self, request):
         paginator = PageNumberPagination()
+        paginator.page_size = 50
         user = self.request.user
         filtered_board = Board.objects.filter(category__in=user.prefer.through.objects.values('category_id'))
         links = Link.objects.filter(board__in=filtered_board, show=True)
