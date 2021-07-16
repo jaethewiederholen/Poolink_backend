@@ -5,9 +5,14 @@ from poolink_backend.bases.api.serializers import ModelSerializer
 
 
 class LinkSerializer(ModelSerializer):
+    link_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Link
-        fields = '__all__'
+        fields = ['link_id', 'board', 'label', 'url', 'show', 'favicon']
+
+    def get_link_id(self, instance):
+        return instance.id
 
 
 class LinkDestroySerializer(serializers.Serializer):

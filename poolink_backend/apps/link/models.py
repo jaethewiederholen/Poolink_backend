@@ -1,13 +1,11 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from poolink_backend.bases.models import Model
-from poolink_backend.apps.users.models import User
 from poolink_backend.apps.board.models import Board
-from poolink_backend.apps.category.models import Category
+from poolink_backend.bases.models import Model
 
 
-class BoardManager(models.Manager):
+class LinkManager(models.Manager):
     pass
 
 

@@ -53,8 +53,13 @@ class BoardViewSet(ModelViewSet):
     #
     #         result = serializers.Serializer("json", board.category.through.objects.all())
     #         return HttpResponse(result)
-
     @action(detail=False)
+    @swagger_auto_schema(
+        operation_id=_("Get My Board Partial Info"),
+        operation_description=_("사이드바에 보여질 보드들 입니다."),
+        responses={200: openapi.Response(_("OK"), PartialBoardSerializer, )},
+        tags=[_("내 보드"), ],
+    )
     def partial(self, request):
         user = self.request.user
         board = Board.objects.filter(user_id=user.id)
