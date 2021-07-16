@@ -99,6 +99,7 @@ class User(AbstractBaseUser, Model, PermissionsMixin):
 
     class Meta:
         verbose_name = verbose_name_plural = "유저"
+        ordering = ['-id']
 
     def __str__(self):
         return "{}".format(self.username)

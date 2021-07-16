@@ -18,17 +18,12 @@ class CategoryList(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Get Category List"),
         operation_description=_("온보딩 화면에 보일 카테고리 전체 리스트입니다."),
-        manual_parameters=[
-            openapi.Parameter('page', openapi.IN_QUERY, type='integer')],
         responses={200: openapi.Response(_("OK"), CategorySerializer, )},
         tags=[_("카테고리"), ],
     )
     def get(self, request, format=None):
-        paginator = PageNumberPagination()
-        paginator.page_size = 9
         categories = Category.objects.all()
-        result = paginator.paginate_queryset(categories, request)
-        serializer = CategorySerializer(result, many=True)
+        serializer = CategorySerializer(categories, many=True)
         return Response(serializer.data)
 
 
