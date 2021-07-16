@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView as BaseAPIView
@@ -17,12 +18,17 @@ class CategoryList(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Get Category List"),
         operation_description=_("온보딩 화면에 보일 카테고리 전체 리스트입니다."),
+        manual_parameters=[
+            openapi.Parameter('page', openapi.IN_QUERY, type='integer')],
         responses={200: openapi.Response(_("OK"), CategorySerializer, )},
         tags=[_("카테고리"), ],
     )
     def get(self, request, format=None):
+        paginator = PageNumberPagination()
+        paginator.page_size = 9
         categories = Category.objects.all()
-        serializer = CategorySerializer(categories, many=True)
+        result = paginator.paginate_queryset(categories, request)
+        serializer = CategorySerializer(result, many=True)
         return Response(serializer.data)
 
 
