@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -27,15 +28,19 @@ class LinkView(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Get Link"),
         operation_description=_("탐색 페이지에서 보여질 링크들입니다. 유저의 선호카테고리로 필터링 됩니다."),
+        manual_parameters=[
+            openapi.Parameter('page', openapi.IN_QUERY, type='integer')],
         responses={200: openapi.Response(_("OK"), LinkSerializer, )},
         tags=[_("링크"), ],
     )
     def get(self, request):
+        paginator = PageNumberPagination()
         user = self.request.user
         filtered_board = Board.objects.filter(category__in=user.prefer.through.objects.values('category_id'))
         links = Link.objects.filter(board__in=filtered_board, show=True)
+        result = paginator.paginate_queryset(links, request)
 
-        return Response(status=HTTP_200_OK, data=LinkSerializer(links, many=True).data)
+        return Response(status=HTTP_200_OK, data=LinkSerializer(result, many=True).data)
 
     @swagger_auto_schema(
         operation_id=_("Create Link"),
