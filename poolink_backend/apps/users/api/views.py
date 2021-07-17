@@ -1,5 +1,6 @@
 from json.decoder import JSONDecodeError
 
+import jwt
 import requests
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.google import views as google_view
@@ -69,7 +70,16 @@ def google_login_view(request):
         user, created = User.objects.update_or_create(
             email=email,
         )
-        return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
+
+        token = jwt.encode({'id': user.id}, settings.JWT_SECRET, algorithm='HS256')
+
+        return JsonResponse({
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'token': token,
+        }, json_dumps_params={'ensure_ascii': False}, status=200)
+        # return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
 
 
 def google_login(request):
@@ -97,6 +107,7 @@ def google_callback(request):
     if error is not None:
         raise JSONDecodeError(error)
     access_token = token_req_json.get('access_token')
+    print("토큰", access_token)
     """
     Email Request
     """

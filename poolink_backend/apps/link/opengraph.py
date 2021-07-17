@@ -1,5 +1,5 @@
-# import opengraph
-from opengraph import opengraph
+import opengraph
+# from opengraph import opengraph
 
 
 class LinkImage:
