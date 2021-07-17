@@ -10,7 +10,7 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="28">
+          <list size="103">
             <item index="0" class="java.lang.String" itemvalue="bs4" />
             <item index="1" class="java.lang.String" itemvalue="astroid" />
             <item index="2" class="java.lang.String" itemvalue="MarkupSafe" />
@@ -39,6 +39,81 @@
             <item index="25" class="java.lang.String" itemvalue="distlib" />
             <item index="26" class="java.lang.String" itemvalue="isort" />
             <item index="27" class="java.lang.String" itemvalue="idna" />
+            <item index="28" class="java.lang.String" itemvalue="QtPy" />
+            <item index="29" class="java.lang.String" itemvalue="cycler" />
+            <item index="30" class="java.lang.String" itemvalue="locket" />
+            <item index="31" class="java.lang.String" itemvalue="patsy" />
+            <item index="32" class="java.lang.String" itemvalue="tables" />
+            <item index="33" class="java.lang.String" itemvalue="contextlib2" />
+            <item index="34" class="java.lang.String" itemvalue="conda-verify" />
+            <item index="35" class="java.lang.String" itemvalue="pyzmq" />
+            <item index="36" class="java.lang.String" itemvalue="HeapDict" />
+            <item index="37" class="java.lang.String" itemvalue="entrypoints" />
+            <item index="38" class="java.lang.String" itemvalue="anaconda-navigator" />
+            <item index="39" class="java.lang.String" itemvalue="bkcharts" />
+            <item index="40" class="java.lang.String" itemvalue="clyent" />
+            <item index="41" class="java.lang.String" itemvalue="navigator-updater" />
+            <item index="42" class="java.lang.String" itemvalue="terminado" />
+            <item index="43" class="java.lang.String" itemvalue="xlwings" />
+            <item index="44" class="java.lang.String" itemvalue="tifffile" />
+            <item index="45" class="java.lang.String" itemvalue="pyodbc" />
+            <item index="46" class="java.lang.String" itemvalue="boto" />
+            <item index="47" class="java.lang.String" itemvalue="h5py" />
+            <item index="48" class="java.lang.String" itemvalue="QDarkStyle" />
+            <item index="49" class="java.lang.String" itemvalue="applaunchservices" />
+            <item index="50" class="java.lang.String" itemvalue="fastcache" />
+            <item index="51" class="java.lang.String" itemvalue="anaconda-client" />
+            <item index="52" class="java.lang.String" itemvalue="cytoolz" />
+            <item index="53" class="java.lang.String" itemvalue="widgetsnbextension" />
+            <item index="54" class="java.lang.String" itemvalue="multipledispatch" />
+            <item index="55" class="java.lang.String" itemvalue="mkl-service" />
+            <item index="56" class="java.lang.String" itemvalue="scikit-image" />
+            <item index="57" class="java.lang.String" itemvalue="Bottleneck" />
+            <item index="58" class="java.lang.String" itemvalue="pathspec" />
+            <item index="59" class="java.lang.String" itemvalue="brotlipy" />
+            <item index="60" class="java.lang.String" itemvalue="pycurl" />
+            <item index="61" class="java.lang.String" itemvalue="json5" />
+            <item index="62" class="java.lang.String" itemvalue="pep8" />
+            <item index="63" class="java.lang.String" itemvalue="pycosat" />
+            <item index="64" class="java.lang.String" itemvalue="llvmlite" />
+            <item index="65" class="java.lang.String" itemvalue="simplegeneric" />
+            <item index="66" class="java.lang.String" itemvalue="jdcal" />
+            <item index="67" class="java.lang.String" itemvalue="mkl-fft" />
+            <item index="68" class="java.lang.String" itemvalue="jupyter" />
+            <item index="69" class="java.lang.String" itemvalue="backports.weakref" />
+            <item index="70" class="java.lang.String" itemvalue="conda" />
+            <item index="71" class="java.lang.String" itemvalue="zict" />
+            <item index="72" class="java.lang.String" itemvalue="xmltodict" />
+            <item index="73" class="java.lang.String" itemvalue="zope.event" />
+            <item index="74" class="java.lang.String" itemvalue="opengraph" />
+            <item index="75" class="java.lang.String" itemvalue="parso" />
+            <item index="76" class="java.lang.String" itemvalue="pytest" />
+            <item index="77" class="java.lang.String" itemvalue="black" />
+            <item index="78" class="java.lang.String" itemvalue="conda-build" />
+            <item index="79" class="java.lang.String" itemvalue="xlwt" />
+            <item index="80" class="java.lang.String" itemvalue="et-xmlfile" />
+            <item index="81" class="java.lang.String" itemvalue="pandas" />
+            <item index="82" class="java.lang.String" itemvalue="future" />
+            <item index="83" class="java.lang.String" itemvalue="mpmath" />
+            <item index="84" class="java.lang.String" itemvalue="olefile" />
+            <item index="85" class="java.lang.String" itemvalue="ply" />
+            <item index="86" class="java.lang.String" itemvalue="gmpy2" />
+            <item index="87" class="java.lang.String" itemvalue="unicodecsv" />
+            <item index="88" class="java.lang.String" itemvalue="argh" />
+            <item index="89" class="java.lang.String" itemvalue="autopep8" />
+            <item index="90" class="java.lang.String" itemvalue="decorator" />
+            <item index="91" class="java.lang.String" itemvalue="anaconda-project" />
+            <item index="92" class="java.lang.String" itemvalue="conda-content-trust" />
+            <item index="93" class="java.lang.String" itemvalue="conda-token" />
+            <item index="94" class="java.lang.String" itemvalue="setuptools" />
+            <item index="95" class="java.lang.String" itemvalue="mkl-random" />
+            <item index="96" class="java.lang.String" itemvalue="jupyter-server" />
+            <item index="97" class="java.lang.String" itemvalue="flake8" />
+            <item index="98" class="java.lang.String" itemvalue="conda-package-handling" />
+            <item index="99" class="java.lang.String" itemvalue="singledispatch" />
+            <item index="100" class="java.lang.String" itemvalue="conda-repo-cli" />
+            <item index="101" class="java.lang.String" itemvalue="anyio" />
+            <item index="102" class="java.lang.String" itemvalue="ruamel-yaml-conda" />
           </list>
         </value>
       </option>
