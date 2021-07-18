@@ -70,16 +70,7 @@ def google_login_view(request):
         user, created = User.objects.update_or_create(
             email=email,
         )
-
-        token = jwt.encode({'id': user.id}, settings.JWT_SECRET, algorithm='HS256')
-
-        return JsonResponse({
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'token': token,
-        }, json_dumps_params={'ensure_ascii': False}, status=200)
-        # return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
+        return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
 
 
 def google_login(request):
