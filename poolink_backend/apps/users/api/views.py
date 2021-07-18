@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.decorators import action, api_view
+from rest_framework.decorators import action, api_view, authentication_classes, permission_classes
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK
@@ -43,6 +43,8 @@ GOOGLE_CALLBACK_URI = BASE_URL + 'google/callback/'
     tags=[_("로그인")],
 )
 @api_view(("POST",))
+@authentication_classes([])
+@permission_classes([])
 def google_login_view(request):
     serializer = GoogleLoginSerializer(data=request.data)
     if serializer.is_valid(raise_exception=True):
