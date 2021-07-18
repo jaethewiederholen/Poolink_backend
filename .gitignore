@@ -334,5 +334,3 @@ poolink_backend/media/
 
 # media-file
 config.media.*
-
-requirements/local.txt
