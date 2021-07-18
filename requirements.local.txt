@@ -170,7 +170,7 @@ tomlkit==0.7.2
 topicaxis-opengraph==0.5
 tornado==6.1
 tqdm==4.61.2
-traitlets==5.0.5
+traitlets==4.3.3
 typing-extensions==3.10.0.0
 uritemplate==3.0.1
 urllib3==1.26.5

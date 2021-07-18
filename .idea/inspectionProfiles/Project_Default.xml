@@ -10,7 +10,7 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="222">
+          <list size="227">
             <item index="0" class="java.lang.String" itemvalue="bs4" />
             <item index="1" class="java.lang.String" itemvalue="astroid" />
             <item index="2" class="java.lang.String" itemvalue="MarkupSafe" />
@@ -233,6 +233,11 @@
             <item index="219" class="java.lang.String" itemvalue="prometheus-client" />
             <item index="220" class="java.lang.String" itemvalue="tqdm" />
             <item index="221" class="java.lang.String" itemvalue="openpyxl" />
+            <item index="222" class="java.lang.String" itemvalue="django-rest-auth" />
+            <item index="223" class="java.lang.String" itemvalue="selenium" />
+            <item index="224" class="java.lang.String" itemvalue="httpie" />
+            <item index="225" class="java.lang.String" itemvalue="psycopg2" />
+            <item index="226" class="java.lang.String" itemvalue="Flask-Login" />
           </list>
         </value>
       </option>
