@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -9,6 +10,7 @@ from poolink_backend.apps.link.api.serializers import (
     LinkSearchSerializer,
     LinkSerializer,
 )
+from poolink_backend.apps.link.grabicon import Favicon
 from poolink_backend.apps.link.models import Board, Link
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
@@ -27,32 +29,51 @@ class LinkView(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Get Link"),
         operation_description=_("탐색 페이지에서 보여질 링크들입니다. 유저의 선호카테고리로 필터링 됩니다."),
+        manual_parameters=[
+            openapi.Parameter('page', openapi.IN_QUERY, type='integer')],
         responses={200: openapi.Response(_("OK"), LinkSerializer, )},
         tags=[_("링크"), ],
     )
     def get(self, request):
+        paginator = PageNumberPagination()
+        paginator.page_size = 50
         user = self.request.user
         filtered_board = Board.objects.filter(category__in=user.prefer.through.objects.values('category_id'))
         links = Link.objects.filter(board__in=filtered_board, show=True)
+        result = paginator.paginate_queryset(links, request)
 
-        return Response(status=HTTP_200_OK, data=LinkSerializer(links, many=True).data)
+        return Response(status=HTTP_200_OK, data=LinkSerializer(result, many=True).data)
 
     @swagger_auto_schema(
         operation_id=_("Create Link"),
         operation_description=_("링크를 추가합니다."),
-        manual_parameters=[
-            openapi.Parameter('hide', openapi.IN_QUERY, type='bool')],
-        request_body=LinkSerializer,
+        request_body=openapi.Schema(type=openapi.TYPE_OBJECT,
+                                    properties={
+                                        'board': openapi.Schema(type=openapi.TYPE_INTEGER,
+                                                                description="링크가 속한 보드 아이디를 입력하세요"),
+                                        'label': openapi.Schema(type=openapi.TYPE_STRING,
+                                                                description="링크 라벨입니다"),
+                                        'url': openapi.Schema(type=openapi.TYPE_STRING,
+                                                              description="링크 url을 저장하세요"),
+                                        'show': openapi.Schema(type=openapi.TYPE_BOOLEAN,
+                                                               description="링크의 공개 여부를 나타냅니 ")
+                                    }),
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ],
     )
     def post(self, request):
-        hide = request.query_params.get('hide', None)
-        if hide:
-            request.data["show"] = False
+
         serializer = LinkSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            favicon = Favicon().get_favicon(serializer.validated_data['url'])
+
+            Link.objects.create(
+                board=serializer.validated_data['board'],
+                label=serializer.validated_data['label'],
+                url=serializer.validated_data['url'],
+                show=serializer.validated_data['show'],
+                favicon=favicon
+            )
             return Response(
                 status=HTTP_200_OK,
                 data=MessageSerializer({"message": _("링크를 저장했습니다.")}).data,

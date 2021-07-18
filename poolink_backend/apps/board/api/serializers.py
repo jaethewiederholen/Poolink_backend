@@ -7,12 +7,17 @@ from poolink_backend.apps.link.api.serializers import LinkSerializer
 from poolink_backend.bases.api.serializers import ModelSerializer
 
 
+# Viewset에 사용되는 serializer
 class BoardSerializer(ModelSerializer):
     links = LinkSerializer(many=True, read_only=True)
+    board_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
-        fields = ['id', 'name', 'user', 'links', 'category', 'scrap']
+        fields = ['board_id', 'name', 'user', 'links', 'category', 'scrap']
+
+    def get_board_id(self, instance):
+        return instance.id
 
 
 class BoardCreateSerializer(ModelSerializer):
@@ -22,7 +27,7 @@ class BoardCreateSerializer(ModelSerializer):
         latest = 0
     category = serializers.ListSerializer(
         child=serializers.IntegerField(
-            min_value=0, max_value=latest), write_only=True,)
+            min_value=0, max_value=latest, write_only=True,))
 
     class Meta:
         model = Board
@@ -39,18 +44,27 @@ class BoardCreateSerializer(ModelSerializer):
 
 
 class PartialBoardSerializer(ModelSerializer):
+    board_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Board
-        fields = ['id', 'name', 'image']
+        fields = ['board_id', 'name', 'image']
+
+    def get_board_id(self, instance):
+        return instance.id
 
 
 class MyBoardSerializer(ModelSerializer):
     links = LinkSerializer(many=True, read_only=True)
     category = CategorySerializer(many=True, read_only=True)
+    board_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
-        fields = ['id', 'name', 'image', 'user', 'links', 'category', 'scrap']
+        fields = ['board_id', 'name', 'image', 'user', 'links', 'category', 'scrap']
+
+    def get_board_id(self, instance):
+        return instance.id
 
 
 class ScrapBoardSerializer(serializers.Serializer):
