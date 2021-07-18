@@ -49,6 +49,7 @@ class Board(Model):
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")
+        ordering = ['-id']
 
     @property
     def like_count(self):

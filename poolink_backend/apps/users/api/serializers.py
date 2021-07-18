@@ -8,10 +8,14 @@ User = get_user_model()
 
 
 class UserSerializer(ModelSerializer):
+    user_id = serializers.SerializerMethodField()
 
     class Meta:
         model = User
-        fields = ["id", "username", "name", "email", 'boards', 'prefer']
+        fields = ["user_id", "username", "name", "email", 'boards', 'prefer']
+
+    def get_user_id(self, instance):
+        return instance.id
 
 
 class GoogleLoginSerializer(serializers.Serializer):
@@ -27,11 +31,12 @@ class TokenSerializer(ModelSerializer):
 
 class UserLoginSuccessSerializer(UserSerializer):
     token = serializers.SerializerMethodField()
+    user_id = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = (
-            "id",
+            "user_id",
             "username",
             "name",
             "email",
@@ -41,3 +46,6 @@ class UserLoginSuccessSerializer(UserSerializer):
 
     def get_token(self, obj):
         return obj.token.key
+
+    def get_user_id(self, instance):
+        return instance.id

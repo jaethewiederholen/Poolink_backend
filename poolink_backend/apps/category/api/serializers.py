@@ -5,9 +5,14 @@ from poolink_backend.bases.api.serializers import ModelSerializer
 
 
 class CategorySerializer(ModelSerializer):
+    category_id = serializers.SerializerMethodField()
+
     class Meta:
         model = Category
-        fields = ['id', 'name', 'image', 'color']
+        fields = ['category_id', 'name', 'image', 'color']
+
+    def get_category_id(self, instance):
+        return instance.id
 
 
 class CategorySelectSerializer(serializers.Serializer):

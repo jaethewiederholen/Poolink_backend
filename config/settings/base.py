@@ -84,6 +84,7 @@ THIRD_PARTY_APPS = [
     # "rest_framework_simplejwt.token_blacklist",
     "dj_rest_auth",
     "dj_rest_auth.registration",
+    "opengraph",
 ]
 
 LOCAL_APPS = [
@@ -300,6 +301,8 @@ REST_FRAMEWORK = {
         'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 30,
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
@@ -317,7 +320,8 @@ CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
                         'https://127.0.0.1:3000',
                         'https://localhost:3000',]
 CORS_ALLOW_CREDENTIALS=True
-# Google Login:
+
+# Google Login
 SOCIAL_AUTH_GOOGLE_CLIENT_ID = env("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
 SOCIAL_AUTH_GOOGLE_SECRET = env("SOCIAL_AUTH_GOOGLE_SECRET")
 STATE = env("STATE")
