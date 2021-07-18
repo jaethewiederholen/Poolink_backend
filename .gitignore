@@ -334,3 +334,8 @@ poolink_backend/media/
 
 # media-file
 config.media.*
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
