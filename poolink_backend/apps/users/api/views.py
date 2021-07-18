@@ -8,13 +8,12 @@ from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import logout
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.decorators import (
-    action,
     api_view,
     authentication_classes,
     permission_classes,
@@ -97,6 +96,7 @@ def google_callback(request):
     if error is not None:
         raise JSONDecodeError(error)
     access_token = token_req_json.get('access_token')
+    print("access token: " + access_token)
     """
     Email Request
     """
@@ -132,6 +132,7 @@ def google_callback(request):
     except User.DoesNotExist:
         # 기존에 가입된 유저가 없으면 새로 가입
         data = {'access_token': access_token, 'code': code}
+        print(access_token)
         accept = requests.post(
             f"{BASE_URL}google/login/finish/", data=data)
         accept_status = accept.status_code
@@ -192,4 +193,3 @@ class UserDeleteView(BaseAPIView):
 
 user_logout_view = UserLogoutView.as_view()
 user_delete_view = UserDeleteView.as_view()
-
