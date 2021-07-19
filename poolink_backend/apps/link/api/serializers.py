@@ -1,5 +1,6 @@
 # import requests
 from rest_framework import serializers
+from rest_framework.pagination import PageNumberPagination
 
 from poolink_backend.apps.link.models import Link
 from poolink_backend.apps.link.opengraph import LinkImage
