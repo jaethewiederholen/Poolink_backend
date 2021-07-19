@@ -100,7 +100,7 @@ mypy-extensions==0.4.3
 nodeenv==1.6.0
 numpy==1.20.3
 oauthlib==3.1.1
-opengraph==0.5
+topicaxis-opengraph==0.5
 packaging==20.9
 pandas==1.2.4
 parso==0.8.2
