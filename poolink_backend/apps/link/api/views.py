@@ -1,6 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -12,12 +13,14 @@ from poolink_backend.apps.link.api.serializers import (
 from poolink_backend.apps.link.grabicon import Favicon
 from poolink_backend.apps.link.models import Board, Link
 from poolink_backend.apps.pagination import CustomPagination
+from poolink_backend.apps.permissions import IsWriterOrReadonly
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
 class LinkViewSet(ModelViewSet):
+    permission_classes = ([IsWriterOrReadonly])
     serializer_class = LinkSerializer
     queryset = Link.objects.filter(show=True,)
 
@@ -65,8 +68,8 @@ class LinkView(BaseAPIView):
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ],
     )
+    @permission_classes([IsWriterOrReadonly])
     def post(self, request):
-
         serializer = LinkSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             favicon = Favicon().get_favicon(serializer.validated_data['url'])
@@ -90,6 +93,7 @@ class LinkView(BaseAPIView):
         responses={204: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ]
     )
+    @permission_classes([IsWriterOrReadonly])
     def delete(self, request):
         serializer = LinkDestroySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
