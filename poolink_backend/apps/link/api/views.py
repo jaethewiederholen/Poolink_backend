@@ -13,7 +13,7 @@ from poolink_backend.apps.link.api.serializers import (
 from poolink_backend.apps.link.grabicon import Favicon
 from poolink_backend.apps.link.models import Board, Link
 from poolink_backend.apps.pagination import CustomPagination
-from poolink_backend.apps.permissions import IsWriterOrReadonly
+from poolink_backend.apps.permissions import IsWriterOrReadonly, LinkDeletePermission
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
@@ -98,20 +98,16 @@ class LinkView(BaseAPIView):
         responses={204: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ]
     )
-    @permission_classes([IsWriterOrReadonly])
+    @permission_classes([LinkDeletePermission])
     def delete(self, request):
-        for i in range(len(request.data['links'])):
-            if request.user != Link.objects.get(id=request.data['links'][i]).board.user:
-                print(i, "번째 링크의 소유자는 다른 유저이기 때문에 삭제에서 제외됩니다.")
-                continue
-            serializer = LinkDestroySerializer(data=request.data)
-            if serializer.is_valid(raise_exception=True):
-                Link.objects.filter(
-                    board_id__in=Board.objects.filter(user=request.user).values('id'),
-                    id__in=serializer.validated_data["links"],
-                ).delete()
+        serializer = LinkDestroySerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            Link.objects.filter(
+                board_id__in=Board.objects.filter(user=request.user).values('id'),
+                id__in=serializer.validated_data["links"],
+            ).delete()
 
-            return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
+        return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
 
 
 link_view = LinkView.as_view()
