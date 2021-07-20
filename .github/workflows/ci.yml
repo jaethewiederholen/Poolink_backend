@@ -7,78 +7,41 @@ env:
 
 on:
   pull_request:
-    branches: [ "master", "main" ]
+    branches: [ main ]
     paths-ignore: [ "docs/**" ]
 
   push:
-    branches: [ "master", "main" ]
+    branches: [ main ]
     paths-ignore: [ "docs/**" ]
 
 
 jobs:
-  linter:
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Checkout Code Repository
-        uses: actions/checkout@v2
-
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-
-      # Run all pre-commit hooks on all the files.
-      # Getting only staged files can be tricky in case a new PR is opened
-      # since the action is run on a branch in detached head state
-      - name: Install and Run Pre-commit 
-        uses: pre-commit/action@v2.0.0
-
-  # With no caching at all the entire ci process takes 4m 30s to complete!
-  pytest:
+  build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:12
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_PASSWORD: postgres
-
-    env:
-      # postgres://user:password@host:port/database
-      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/postgres"
-
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v1
 
-      - name: Checkout Code Repository
-        uses: actions/checkout@v2
+      - name: Generate deployment package
+        run: zip -r deploy.zip . -x '*.git*'
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
+      # Runs a single command using the runners shell
+      - name: Echo
+        run: echo Start AWS deployment now!
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v14
         with:
-          python-version: 3.9
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: poolink
+          environment_name: poolink-django
+          version_label: ${{ github.sha }}
+          version_description: ${{ github.event.head_commit.message }}
+          region: ap-northeast-2
+          deployment_package: deploy.zip
+          use_existing_version_if_available: true
 
-      - name: Get pip cache dir
-        id: pip-cache-location
-        run: |
-          echo "::set-output name=dir::$(pip cache dir)"
-
-      - name: Cache pip Project Dependencies
-        uses: actions/cache@v2
-        with:
-          # Get the location of pip cache dir
-          path: ${{ steps.pip-cache-location.outputs.dir }}
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/local.txt') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements/local.txt
-
-      - name: Test with pytest
-        run:  pytest

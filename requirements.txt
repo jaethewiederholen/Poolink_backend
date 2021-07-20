@@ -1,3 +1,5 @@
+-r ./requirements/production.txt
+
 alabaster==0.7.12
 appdirs==1.4.4
 appnope==0.1.2
@@ -76,9 +78,9 @@ idna==2.10
 imagesize==1.2.0
 inflection==0.5.1
 iniconfig==1.1.1
-ipdb==0.13.7
-ipython==7.17.0
-ipython-genutils==0.2.0
+# ipdb==0.13.7
+# ipython==7.17.0
+# ipython-genutils==0.2.0
 isort==5.8.0
 itsdangerous==1.1.0
 itypes==1.2.0
