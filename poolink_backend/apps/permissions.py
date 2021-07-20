@@ -13,6 +13,14 @@ class IsWriterOrReadonly(permissions.BasePermission):
         return obj.user == request.user
 
 
+class LinkDeletePermission(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        # 자신의 정보만 수정, 삭제 가능
+        return obj.board.user == request.user
+
+
 class ProfileUpdatePermission(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
