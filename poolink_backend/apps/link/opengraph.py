@@ -1,4 +1,3 @@
-# import opengraph
 from opengraph.opengraph import OpenGraph
 
 
