@@ -2,7 +2,6 @@ from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
-# from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -17,12 +16,14 @@ from poolink_backend.apps.board.api.serializers import (
 )
 from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.pagination import CustomPagination
+from poolink_backend.apps.permissions import IsWriterOrReadonly
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
 class BoardViewSet(ModelViewSet):
+    permission_classes = ([IsWriterOrReadonly])
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
 

@@ -13,7 +13,7 @@ from poolink_backend.apps.link.api.serializers import (
 from poolink_backend.apps.link.grabicon import Favicon
 from poolink_backend.apps.link.models import Board, Link
 from poolink_backend.apps.pagination import CustomPagination
-from poolink_backend.apps.permissions import IsWriterOrReadonly
+from poolink_backend.apps.permissions import IsWriterOrReadonly, LinkDeletePermission
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
@@ -70,21 +70,26 @@ class LinkView(BaseAPIView):
     )
     @permission_classes([IsWriterOrReadonly])
     def post(self, request):
-        serializer = LinkSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            favicon = Favicon().get_favicon(serializer.validated_data['url'])
+        if request.user == Board.objects.get(id=request.data['board']).user:
+            print("유저 동일")
+            serializer = LinkSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                favicon = Favicon().get_favicon(serializer.validated_data['url'])
 
-            Link.objects.create(
-                board=serializer.validated_data['board'],
-                label=serializer.validated_data['label'],
-                url=serializer.validated_data['url'],
-                show=serializer.validated_data['show'],
-                favicon=favicon
-            )
-            return Response(
-                status=HTTP_200_OK,
-                data=MessageSerializer({"message": _("링크를 저장했습니다.")}).data,
-            )
+                Link.objects.create(
+                    board=serializer.validated_data['board'],
+                    label=serializer.validated_data['label'],
+                    url=serializer.validated_data['url'],
+                    show=serializer.validated_data['show'],
+                    favicon=favicon
+                )
+                return Response(
+                    status=HTTP_200_OK,
+                    data=MessageSerializer({"message": _("링크를 저장했습니다.")}).data,
+                )
+        else:
+            print("유저 다름")
+            return Response(data=MessageSerializer({"message": _("접근 권한이 없습니다.")}).data)
 
     @swagger_auto_schema(
         operation_id=_("Delete My Link"),
@@ -93,7 +98,7 @@ class LinkView(BaseAPIView):
         responses={204: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ]
     )
-    @permission_classes([IsWriterOrReadonly])
+    @permission_classes([LinkDeletePermission])
     def delete(self, request):
         serializer = LinkDestroySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):

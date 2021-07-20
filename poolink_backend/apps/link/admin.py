@@ -5,5 +5,5 @@ from poolink_backend.apps.link.models import Link
 
 @admin.register(Link)
 class BoardAdmin(admin.ModelAdmin):
-    list_display = ("label", "url", "show")
+    list_display = ("id", "board_id", "label", "url", "show")
 
