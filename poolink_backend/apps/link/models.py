@@ -41,6 +41,12 @@ class Link(Model):
         null=True,
         blank=True,
     )
+    meta_image = models.URLField(
+        verbose_name=_("링크 미리보기 이미지"),
+        help_text=_("링크의 미리보기 이미지입니다."),
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("링크")

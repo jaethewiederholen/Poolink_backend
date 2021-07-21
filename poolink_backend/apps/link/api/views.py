@@ -12,6 +12,7 @@ from poolink_backend.apps.link.api.serializers import (
 )
 from poolink_backend.apps.link.grabicon import Favicon
 from poolink_backend.apps.link.models import Board, Link
+from poolink_backend.apps.link.opengraph import LinkImage
 from poolink_backend.apps.pagination import CustomPagination
 from poolink_backend.apps.permissions import IsWriterOrReadonly, LinkDeletePermission
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -75,13 +76,15 @@ class LinkView(BaseAPIView):
             serializer = LinkSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 favicon = Favicon().get_favicon(serializer.validated_data['url'])
+                meta_image = LinkImage().get_link_image(serializer.validated_data['url'])
 
                 Link.objects.create(
                     board=serializer.validated_data['board'],
                     label=serializer.validated_data['label'],
                     url=serializer.validated_data['url'],
                     show=serializer.validated_data['show'],
-                    favicon=favicon
+                    favicon=favicon,
+                    meta_image=meta_image
                 )
                 return Response(
                     status=HTTP_200_OK,
