@@ -69,16 +69,13 @@ class LinkView(BaseAPIView):
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ],
     )
-    def get_link_image(self, url):
-        return LinkImage.get_link_image(self, url=url)
-
     @permission_classes([IsWriterOrReadonly])
     def post(self, request):
         if request.user == Board.objects.get(id=request.data['board']).user:
             serializer = LinkSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 favicon = Favicon().get_favicon(serializer.validated_data['url'])
-                meta_image = self.get_link_image(serializer.validated_data['url'])
+                meta_image = LinkImage().get_link_image(serializer.validated_data['url'])
 
                 Link.objects.create(
                     board=serializer.validated_data['board'],
