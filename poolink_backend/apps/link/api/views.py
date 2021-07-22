@@ -1,7 +1,7 @@
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -12,12 +12,16 @@ from poolink_backend.apps.link.api.serializers import (
 )
 from poolink_backend.apps.link.grabicon import Favicon
 from poolink_backend.apps.link.models import Board, Link
+from poolink_backend.apps.link.opengraph import LinkImage
+from poolink_backend.apps.pagination import CustomPagination
+from poolink_backend.apps.permissions import IsWriterOrReadonly, LinkDeletePermission
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
 class LinkViewSet(ModelViewSet):
+    permission_classes = ([IsWriterOrReadonly])
     serializer_class = LinkSerializer
     queryset = Link.objects.filter(show=True,)
 
@@ -35,14 +39,18 @@ class LinkView(BaseAPIView):
         tags=[_("링크"), ],
     )
     def get(self, request):
-        paginator = PageNumberPagination()
+        paginator = CustomPagination()
         paginator.page_size = 50
+        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
         filtered_board = Board.objects.filter(category__in=user.prefer.through.objects.values('category_id'))
         links = Link.objects.filter(board__in=filtered_board, show=True)
         result = paginator.paginate_queryset(links, request)
+        data_count = len(result)
 
-        return Response(status=HTTP_200_OK, data=LinkSerializer(result, many=True).data)
+        return Response(status=HTTP_200_OK, data={"dataCount": data_count,
+                                                  "totalPageCount": page_count,
+                                                  "results": LinkSerializer(result, many=True).data})
 
     @swagger_auto_schema(
         operation_id=_("Create Link"),
@@ -61,23 +69,32 @@ class LinkView(BaseAPIView):
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ],
     )
+    def get_link_image(self, url):
+        return LinkImage.get_link_image(self, url=url)
+
+    @permission_classes([IsWriterOrReadonly])
     def post(self, request):
+        if request.user == Board.objects.get(id=request.data['board']).user:
+            serializer = LinkSerializer(data=request.data)
+            if serializer.is_valid(raise_exception=True):
+                favicon = Favicon().get_favicon(serializer.validated_data['url'])
+                meta_image = self.get_link_image(serializer.validated_data['url'])
 
-        serializer = LinkSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            favicon = Favicon().get_favicon(serializer.validated_data['url'])
-
-            Link.objects.create(
-                board=serializer.validated_data['board'],
-                label=serializer.validated_data['label'],
-                url=serializer.validated_data['url'],
-                show=serializer.validated_data['show'],
-                favicon=favicon
-            )
-            return Response(
-                status=HTTP_200_OK,
-                data=MessageSerializer({"message": _("링크를 저장했습니다.")}).data,
-            )
+                Link.objects.create(
+                    board=serializer.validated_data['board'],
+                    label=serializer.validated_data['label'],
+                    url=serializer.validated_data['url'],
+                    show=serializer.validated_data['show'],
+                    favicon=favicon,
+                    meta_image=meta_image
+                )
+                return Response(
+                    status=HTTP_200_OK,
+                    data=MessageSerializer({"message": _("링크를 저장했습니다.")}).data,
+                )
+        else:
+            print("유저 다름")
+            return Response(data=MessageSerializer({"message": _("접근 권한이 없습니다.")}).data)
 
     @swagger_auto_schema(
         operation_id=_("Delete My Link"),
@@ -86,6 +103,7 @@ class LinkView(BaseAPIView):
         responses={204: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ]
     )
+    @permission_classes([LinkDeletePermission])
     def delete(self, request):
         serializer = LinkDestroySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):

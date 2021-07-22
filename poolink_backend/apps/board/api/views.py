@@ -2,8 +2,6 @@ from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
-# from rest_framework.permissions import IsAuthenticated
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
 
@@ -17,12 +15,15 @@ from poolink_backend.apps.board.api.serializers import (
     ScrapBoardSerializer,
 )
 from poolink_backend.apps.board.models import Board
+from poolink_backend.apps.pagination import CustomPagination
+from poolink_backend.apps.permissions import IsWriterOrReadonly
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
 class BoardViewSet(ModelViewSet):
+    permission_classes = ([IsWriterOrReadonly])
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
 
@@ -62,10 +63,16 @@ class BoardViewSet(ModelViewSet):
         tags=[_("내 보드"), ],
     )
     def partial(self, request):
+        paginator = CustomPagination()
+        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
-        board = Board.objects.filter(user_id=user.id)
-        serializer = PartialBoardSerializer(board, many=True)
-        return Response(serializer.data)
+        boards = Board.objects.filter(user_id=user.id)
+        result = paginator.paginate_queryset(boards, request)
+        data_count = len(result)
+
+        return Response(status=HTTP_200_OK, data={"dataCount": data_count,
+                                                  "totalPageCount": page_count,
+                                                  "results": PartialBoardSerializer(result, many=True).data})
 
 
 class MyBoardView(BaseAPIView):
@@ -76,18 +83,22 @@ class MyBoardView(BaseAPIView):
         operation_description=_("저장 페이지에 보여질 보드들 입니다."),
         manual_parameters=[
             openapi.Parameter('page', openapi.IN_QUERY, type='integer')],
-        responses={200: openapi.Response(_("OK"), MyBoardSerializer,)},
+        responses={200: openapi.Response(_("OK"), MyBoardSerializer, )},
         tags=[_("내 보드"), ],
     )
     def get(self, request):
-        paginator = PageNumberPagination()
+        paginator = CustomPagination()
+        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
         my_board = Board.objects.filter(user_id=user.id)
         scrapped_board = self.request.user.scrap.all()
         boards = my_board | scrapped_board
         result = paginator.paginate_queryset(boards, request)
+        data_count = len(result)
 
-        return Response(status=HTTP_200_OK, data=MyBoardSerializer(result, many=True).data)
+        return Response(status=HTTP_200_OK, data={"dataCount": data_count,
+                                                  "totalPageCount": page_count,
+                                                  "results": MyBoardSerializer(result, many=True).data})
 
     @swagger_auto_schema(
         operation_id=_("Create My Board"),
