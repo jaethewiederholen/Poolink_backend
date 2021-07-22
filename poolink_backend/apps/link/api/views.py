@@ -3,10 +3,9 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_200_OK  # HTTP_204_NO_CONTENT
 
-from poolink_backend.apps.link.api.serializers import (
-    LinkDestroySerializer,
+from poolink_backend.apps.link.api.serializers import (  # LinkDestroySerializer,
     LinkSearchSerializer,
     LinkSerializer,
 )
@@ -14,7 +13,7 @@ from poolink_backend.apps.link.grabicon import Favicon
 from poolink_backend.apps.link.models import Board, Link
 from poolink_backend.apps.link.opengraph import LinkImage
 from poolink_backend.apps.pagination import CustomPagination
-from poolink_backend.apps.permissions import IsWriterOrReadonly, LinkDeletePermission
+from poolink_backend.apps.permissions import IsWriterOrReadonly  # LinkDeletePermission
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
@@ -93,23 +92,23 @@ class LinkView(BaseAPIView):
             print("유저 다름")
             return Response(data=MessageSerializer({"message": _("접근 권한이 없습니다.")}).data)
 
-    @swagger_auto_schema(
-        operation_id=_("Delete My Link"),
-        operation_description=_("링크를 삭제합니다."),
-        request_body=LinkDestroySerializer,
-        responses={204: openapi.Response(_("OK"), MessageSerializer)},
-        tags=[_("링크"), ]
-    )
-    @permission_classes([LinkDeletePermission])
-    def delete(self, request):
-        serializer = LinkDestroySerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            Link.objects.filter(
-                board_id__in=Board.objects.filter(user=request.user).values('id'),
-                id__in=serializer.validated_data["links"],
-            ).delete()
-
-        return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
+    # @swagger_auto_schema(
+    #     operation_id=_("Delete My Link"),
+    #     operation_description=_("링크를 삭제합니다."),
+    #     request_body=LinkDestroySerializer,
+    #     responses={204: openapi.Response(_("OK"), MessageSerializer)},
+    #     tags=[_("링크"), ]
+    # )
+    # @permission_classes([LinkDeletePermission])
+    # def delete(self, request):
+    #     serializer = LinkDestroySerializer(data=request.data)
+    #     if serializer.is_valid(raise_exception=True):
+    #         Link.objects.filter(
+    #             board_id__in=Board.objects.filter(user=request.user).values('id'),
+    #             id__in=serializer.validated_data["links"],
+    #         ).delete()
+    #
+    #     return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
 
 
 link_view = LinkView.as_view()
