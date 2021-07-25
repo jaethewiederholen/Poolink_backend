@@ -26,9 +26,9 @@ from rest_framework.viewsets import GenericViewSet
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
     GoogleLoginSerializer,
-    UserLoginSuccessSerializer,
+    UserLoginSuccessSerializer, SignupSerializer,
 )
-from poolink_backend.apps.users.models import User
+from poolink_backend.apps.users.models import User, Path
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 
@@ -151,14 +151,28 @@ class GoogleLogin(SocialLoginView):
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-    # lookup_field = "id"
-    # def get_queryset(self, *args, **kwargs):
-    #     return self.queryset.filter(id=self.request.user.id)
 
-    # @action(detail=False, methods=["GET"])
-    # def me(self, request):
-    #     serializer = UserSerializer(request.user, context={"request": request})
-    #     return Response(status=status.HTTP_200_OK, data=serializer.data)
+
+class UserSignupView(BaseAPIView):
+    allowed_method = "PUT"
+
+    @swagger_auto_schema(
+        operation_id=_("Sign Up"),
+        operation_description=_("유저 회원가입 - 추가정보"),
+        request_body=SignupSerializer,
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+        tags=[_("회원가입"), ],
+    )
+    def put(self, request):
+        user = request.user
+        serializer = SignupSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            username = serializer.validated_data["username"]
+            name = serializer.validated_data["name"]
+            path = serializer.validated_data["path"]
+            user.update(username=username, name=name)
+            Path.objects.create(path=path)
+        return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("회원가입 완료")}).data)
 
 
 class UserLogoutView(BaseAPIView):
@@ -190,5 +204,6 @@ class UserDeleteView(BaseAPIView):
         return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("유저를 삭제했습니다.")}).data)
 
 
+user_signup_view = UserSignupView.as_view()
 user_logout_view = UserLogoutView.as_view()
 user_delete_view = UserDeleteView.as_view()

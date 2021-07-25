@@ -2,6 +2,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 
+from poolink_backend.apps.users.models import Path
 from poolink_backend.bases.api.serializers import ModelSerializer
 
 User = get_user_model()
@@ -12,7 +13,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["user_id", "username", "name", "email", 'boards', 'prefer']
+        fields = ["user_id", "username", "name", "email", "prefer"]
 
     def get_user_id(self, instance):
         return instance.id
@@ -49,3 +50,27 @@ class UserLoginSuccessSerializer(UserSerializer):
 
     def get_user_id(self, instance):
         return instance.id
+
+
+class PathSerializer(ModelSerializer):
+    class Meta:
+        model = Path
+        fields = ["path", ]
+
+
+class SignupSerializer(serializers.Serializer):
+    username = serializers.CharField(
+        max_length=70,
+        min_length=1,
+        trim_whitespace=True
+    )
+    name = serializers.CharField(
+        max_length=70,
+        min_length=1,
+        trim_whitespace=True
+    )
+    path = serializers.CharField(
+        max_length=None,
+        min_length=None,
+        trim_whitespace=True
+    )
