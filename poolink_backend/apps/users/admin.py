@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from poolink_backend.apps.users.forms import UserChangeForm, UserCreationForm
+from poolink_backend.apps.users.models import Path
 
 User = get_user_model()
 
@@ -55,3 +56,4 @@ class UserAdmin(auth_admin.UserAdmin):
 
 
 admin.site.register(User, UserAdmin)
+admin.site.register(Path)
