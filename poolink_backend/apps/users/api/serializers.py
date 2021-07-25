@@ -12,7 +12,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["user_id", "username", "name", "email", 'boards', 'prefer']
+        fields = ["user_id", "username", "name", "email"]
 
     def get_user_id(self, instance):
         return instance.id
@@ -49,3 +49,9 @@ class UserLoginSuccessSerializer(UserSerializer):
 
     def get_user_id(self, instance):
         return instance.id
+
+
+class DuplicateCheckSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["username"]

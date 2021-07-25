@@ -25,6 +25,7 @@ from rest_framework.viewsets import GenericViewSet
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
+    DuplicateCheckSerializer,
     GoogleLoginSerializer,
     UserLoginSuccessSerializer,
 )
@@ -190,5 +191,22 @@ class UserDeleteView(BaseAPIView):
         return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("유저를 삭제했습니다.")}).data)
 
 
+class DuplicateCheckView(BaseAPIView):
+    allowed_method = "POST"
+
+    @swagger_auto_schema(
+        operation_id=_("Check duplicate username"),
+        operation_description=_("유저네임 중복 확인 합니다."),
+        request_body=DuplicateCheckSerializer,
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+        tags=[_("회원가입")],
+    )
+    def post(self, request):
+        serializer = DuplicateCheckSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("사용가능한 유저네임입니다.")}).data)
+
+
+duplicate_check_view = DuplicateCheckView.as_view()
 user_logout_view = UserLogoutView.as_view()
 user_delete_view = UserDeleteView.as_view()
