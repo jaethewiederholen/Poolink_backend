@@ -1,11 +1,11 @@
-import opengraph
+from opengraph.opengraph import OpenGraph
 
 
 class LinkImage:
 
     def get_link_image(self, url):
         try:
-            image = opengraph.OpenGraph(url=url)
+            image = OpenGraph(url=url)
         except Exception as e:
             print(e)
             return None
