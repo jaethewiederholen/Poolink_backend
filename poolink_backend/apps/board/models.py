@@ -36,6 +36,7 @@ class Board(Model):
         verbose_name=_("보드 설명"),
         help_text=_("보드에 대한 설명입니다"),
         null=True,
+        blank=True,
     )
     charge = models.BooleanField(
         verbose_name=_("유료보드 설정 여부"),

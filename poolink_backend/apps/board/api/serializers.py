@@ -14,7 +14,7 @@ class BoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'user', 'links', 'category', 'scrap']
+        fields = ['board_id', 'name', 'image', 'user', 'bio', 'links', 'category', 'scrap']
 
     def get_board_id(self, instance):
         return instance.id
@@ -61,7 +61,7 @@ class MyBoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'image', 'user', 'links', 'category', 'scrap']
+        fields = ['board_id', 'name', 'image', 'user', 'bio', 'links', 'category', 'scrap']
 
     def get_board_id(self, instance):
         return instance.id
