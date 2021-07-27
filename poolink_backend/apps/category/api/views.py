@@ -47,13 +47,12 @@ class CategorySelectView(BaseAPIView):
             delete_category = list(set(before_category_id) - set(after_category_id))
             add_category = list(set(after_category_id) - set(before_category_id))
 
-            for i in range(0, len(before_category_id)):
-                for j in range(0, len(delete_category)):
+            for i in range(len(before_category_id)):
+                for j in range(len(delete_category)):
                     if before_category_id[i] == delete_category[j]:
-                        user.prefer.through.objects.get(category_id=delete_category[i]).delete()
+                        user.prefer.through.objects.get(category_id=delete_category[j]).delete()
 
             for i in add_category:
                 user.prefer.add(i)
-
             # result = serializers.Serializer("json", user.prefer.through.objects.all())
         return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("유저의 선호 카테고리를 설정했습니다.")}).data,)
