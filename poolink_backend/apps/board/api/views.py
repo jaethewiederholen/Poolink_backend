@@ -136,9 +136,9 @@ class MyBoardView(BaseAPIView):
             if not query:
                 return Response(status=HTTP_400_BAD_REQUEST,
                                 data=MessageSerializer({"message": _("보드 삭제의 권한이 없거나 존재하지 않는 보드입니다.")}).data)
-            else:
-                query.delete()
-                return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
+
+            query.delete()
+            return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
 
 
 my_board_view = MyBoardView.as_view()
