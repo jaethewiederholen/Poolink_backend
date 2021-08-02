@@ -1,6 +1,4 @@
-from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
@@ -129,7 +127,6 @@ class MyBoardView(BaseAPIView):
                    400: openapi.Response(_("Bad Request"), MessageSerializer)},
         tags=[_("내 보드"), ]
     )
-    @method_decorator(csrf_exempt, name='dispatch')
     def delete(self, request):
         serializer = BoardDestroySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -137,12 +134,9 @@ class MyBoardView(BaseAPIView):
                 user=request.user,
                 id__in=serializer.validated_data["boards"]
             )
-            if not query:
-                return Response(status=HTTP_400_BAD_REQUEST,
-                                data=MessageSerializer({"message": _("보드 삭제의 권한이 없거나 존재하지 않는 보드입니다.")}).data)
-
-            query.delete()
-            return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
+            if query:
+                query.delete()
+                return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
 
 
 my_board_view = MyBoardView.as_view()
