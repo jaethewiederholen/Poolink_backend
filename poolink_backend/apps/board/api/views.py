@@ -133,7 +133,7 @@ class MyBoardView(BaseAPIView):
             Board.objects.filter(
                 user=request.user,
                 id__in=serializer.validated_data["boards"]
-            ).destroy()
+            ).delete()
             # if not query:
             #     return Response(status=HTTP_400_BAD_REQUEST,
             #                     data=MessageSerializer({"message": _("보드 삭제 권한이 없거나 존재하지 않는 보드입니다.")}).data)
