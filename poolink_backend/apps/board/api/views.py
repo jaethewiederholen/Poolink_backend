@@ -3,7 +3,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 
 from poolink_backend.apps.board.api.serializers import (
     BoardCreateSerializer,
@@ -129,12 +129,16 @@ class MyBoardView(BaseAPIView):
     def delete(self, request):
         serializer = BoardDestroySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            Board.objects.filter(
+            query = Board.objects.filter(
                 user=request.user,
                 id__in=serializer.validated_data["boards"]
-            ).delete()
-
-        return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
+            )
+            if not query:
+                return Response(status=HTTP_400_BAD_REQUEST,
+                                data=MessageSerializer({"message": _("보드 삭제의 권한이 없거나 존재하지 않는 보드입니다.")}).data)
+            else:
+                query.delete()
+                return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
 
 
 my_board_view = MyBoardView.as_view()
@@ -173,11 +177,15 @@ class ScrapBoardView(BaseAPIView):
         serializer = ScrapBoardDestroySerializer(data=request.data)
         user = request.user
         if serializer.is_valid(raise_exception=True):
-            user.scrap.through.objects.filter(
+            query = user.scrap.through.objects.filter(
                 board__in=serializer.validated_data["scrap_boards"]
-            ).delete()
-
-        return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("스크랩 보드를 삭제했습니다.")}).data)
+            )
+            if not query:
+                return Response(status=HTTP_400_BAD_REQUEST,
+                                data=MessageSerializer({"message": _("스크랩 취소 권한이 없거나 존재하지 않는 스크랩보드입니다.")}).data)
+            else:
+                query.delete()
+                return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("스크랩을 취소했습니다.")}).data)
 
 
 scrap_board_view = ScrapBoardView.as_view()

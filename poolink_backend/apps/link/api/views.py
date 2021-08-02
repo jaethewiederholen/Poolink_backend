@@ -3,7 +3,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
 
 from poolink_backend.apps.link.api.serializers import (
     LinkDestroySerializer,
@@ -104,12 +104,16 @@ class LinkView(BaseAPIView):
     def delete(self, request):
         serializer = LinkDestroySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            Link.objects.filter(
+            query = Link.objects.filter(
                 board_id__in=Board.objects.filter(user=request.user).values('id'),
                 id__in=serializer.validated_data["links"],
-            ).delete()
-
-        return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
+            )
+            if not query:
+                return Response(status=HTTP_400_BAD_REQUEST,
+                                data=MessageSerializer({"message": _("링크 삭제의 권한이 없거나 존재하지 않는 링크입니다.")}).data)
+            else:
+                query.delete()
+                return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
 
 
 link_view = LinkView.as_view()
