@@ -1,4 +1,6 @@
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
@@ -123,9 +125,11 @@ class MyBoardView(BaseAPIView):
         operation_id=_("Delete My Board"),
         operation_description=_("보드를 삭제합니다."),
         request_body=BoardDestroySerializer,
-        responses={204: openapi.Response(_("OK"), MessageSerializer)},
+        responses={204: openapi.Response(_("OK"), MessageSerializer),
+                   400: openapi.Response(_("Bad Request"), MessageSerializer)},
         tags=[_("내 보드"), ]
     )
+    @method_decorator(csrf_exempt, name='dispatch')
     def delete(self, request):
         serializer = BoardDestroySerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
