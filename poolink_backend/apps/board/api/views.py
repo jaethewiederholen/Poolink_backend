@@ -15,6 +15,7 @@ from poolink_backend.apps.board.api.serializers import (
     ScrapBoardSerializer,
 )
 from poolink_backend.apps.board.models import Board
+from poolink_backend.apps.category.models import Category
 from poolink_backend.apps.pagination import CustomPagination
 from poolink_backend.apps.permissions import IsWriterOrReadonly
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -26,6 +27,10 @@ class BoardViewSet(ModelViewSet):
     permission_classes = ([IsWriterOrReadonly])
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
+
+    def partial_update(self, request, *args, **kwargs):
+        self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
+        return super().partial_update(request)
 
     # @action(detail=True, methods=['get', 'post'])
     # def categories(self, request, pk):
@@ -112,6 +117,7 @@ class MyBoardView(BaseAPIView):
         serializer = BoardCreateSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             new_board = serializer.save()
+            new_board.update(image=Category.objects.get(id=serializer.validated_data["category"][0]).image)
             data = {"id": new_board.id}
             data.update(MessageSerializer({"message": _("보드를 생성했습니다.")}).data)
             return Response(
