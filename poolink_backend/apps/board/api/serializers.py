@@ -94,12 +94,13 @@ class ScrapBoardSerializer(serializers.Serializer):
 
 
 class BoardDestroySerializer(serializers.Serializer):
-    try:
-        latest = Board.objects.latest('id').id
-    except Board.DoesNotExist:
-        latest = 0
+    # try:
+    #     latest = Board.objects.latest('id').id
+    # except Board.DoesNotExist:
+    #     latest = 0
     boards = serializers.ListField(
-        child=serializers.IntegerField(min_value=0, max_value=latest),
+        # child=serializers.IntegerField(min_value=0, max_value=latest),
+        child=serializers.IntegerField(),
         write_only=True,
     )
 
