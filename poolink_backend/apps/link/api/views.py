@@ -97,7 +97,7 @@ class LinkView(BaseAPIView):
         operation_id=_("Delete My Link"),
         operation_description=_("링크를 삭제합니다."),
         request_body=LinkDestroySerializer,
-        responses={204: openapi.Response(_("OK"), MessageSerializer)},
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("링크"), ]
     )
     @permission_classes([LinkDeletePermission])
@@ -113,7 +113,7 @@ class LinkView(BaseAPIView):
                                 data=MessageSerializer({"message": _("링크 삭제의 권한이 없거나 존재하지 않는 링크입니다.")}).data)
             else:
                 query.delete()
-                return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
+                return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("링크를 삭제했습니다.")}).data)
 
 
 link_view = LinkView.as_view()
@@ -129,7 +129,7 @@ class LinkSearchView(BaseAPIView):
         manual_parameters=[
             openapi.Parameter('my', openapi.IN_QUERY, type='bool')],
         request_body=LinkSearchSerializer,
-        responses={204: openapi.Response(_("OK"), LinkSearchSerializer)},
+        responses={200: openapi.Response(_("OK"), LinkSearchSerializer)},
         tags=[_("링크"), ]
     )
     def post(self, request):

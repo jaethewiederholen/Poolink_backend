@@ -172,7 +172,7 @@ class ScrapBoardView(BaseAPIView):
         operation_id=_("Delete Scrap Board"),
         operation_description=_("스크랩 보드를 삭제합니다."),
         request_body=ScrapBoardDestroySerializer,
-        responses={204: openapi.Response(_("OK"), MessageSerializer)},
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("스크랩 보드"), ]
     )
     def delete(self, request):
@@ -187,7 +187,7 @@ class ScrapBoardView(BaseAPIView):
                                 data=MessageSerializer({"message": _("스크랩 취소 권한이 없거나 존재하지 않는 스크랩보드입니다.")}).data)
             else:
                 query.delete()
-                return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("스크랩을 취소했습니다.")}).data)
+                return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("스크랩을 취소했습니다.")}).data)
 
 
 scrap_board_view = ScrapBoardView.as_view()
