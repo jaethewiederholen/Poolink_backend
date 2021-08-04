@@ -29,7 +29,8 @@ class BoardViewSet(ModelViewSet):
     queryset = Board.objects.all()
 
     def partial_update(self, request, *args, **kwargs):
-        self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
+        if "category" in request.data:
+            self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
         return super().partial_update(request)
 
     # @action(detail=True, methods=['get', 'post'])
