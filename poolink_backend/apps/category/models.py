@@ -31,6 +31,7 @@ class Category(Model):
 
     class Meta:
         verbose_name = verbose_name_plural = _("카테고리")
+        ordering = ['id']
 
     def __str__(self):
         return self.name
