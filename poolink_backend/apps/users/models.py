@@ -64,7 +64,7 @@ class User(AbstractBaseUser, Model, PermissionsMixin):
         help_text=_("유니크한 유저 이름입니다."),
         null=False,
         max_length=70,
-        # unique=True,
+        unique=True,
     )
     #: First and last name do not cover name patterns around the globe
     name = models.CharField(
