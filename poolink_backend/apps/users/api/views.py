@@ -4,7 +4,6 @@ import requests
 from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.google import views as google_view
 from allauth.socialaccount.providers.oauth2.client import OAuth2Client
-
 from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import logout
 from django.http import JsonResponse
@@ -20,17 +19,17 @@ from rest_framework.decorators import (
 )
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT
+from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
     DuplicateCheckSerializer,
     GoogleLoginSerializer,
-    UserLoginSuccessSerializer,
     SignupSerializer,
+    UserLoginSuccessSerializer,
 )
-from poolink_backend.apps.users.models import User, Path
+from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 
@@ -213,13 +212,24 @@ class DuplicateCheckView(BaseAPIView):
         operation_id=_("Check duplicate username"),
         operation_description=_("유저네임 중복 확인 합니다."),
         request_body=DuplicateCheckSerializer,
-        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+        responses={200: openapi.Response(_("OK"), MessageSerializer),
+                   409: openapi.Response(_("CONFLICT"), MessageSerializer)},
         tags=[_("회원가입")],
     )
     def post(self, request):
         serializer = DuplicateCheckSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("사용가능한 유저네임입니다.")}).data)
+            username = serializer.validated_data["username"]
+            try:
+                _username = User.objects.get(username=username)
+            except (Exception,):
+                _username = None
+
+            if not _username:
+                return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("사용가능한 유저네임입니다.")}).data)
+            else:
+                return Response(status=HTTP_409_CONFLICT,
+                                data=MessageSerializer({"message": _("이미 사용중인 유저네임입니다.")}).data)
 
 
 duplicate_check_view = DuplicateCheckView.as_view()
