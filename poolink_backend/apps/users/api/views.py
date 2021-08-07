@@ -197,13 +197,13 @@ class UserDeleteView(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Delete User"),
         operation_description=_("회원 탈퇴 - 현재 요청을 보내는 유저를 삭제합니다."),
-        responses={204: openapi.Response(_("OK"), MessageSerializer)},
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("로그아웃, 탈퇴"), ],
     )
     def delete(self, request):
         user = request.user
         user.delete()
-        return Response(status=HTTP_204_NO_CONTENT, data=MessageSerializer({"message": _("유저를 삭제했습니다.")}).data)
+        return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("유저를 삭제했습니다.")}).data)
 
 
 class DuplicateCheckView(BaseAPIView):
