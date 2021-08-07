@@ -39,8 +39,9 @@ class CategorySelectView(BaseAPIView):
         serializer = CategorySelectSerializer(data=request.data,)
         if serializer.is_valid(raise_exception=True):
             before_category_id = []
-            for i in range(len(user.prefer.through.objects.all())):
-                before_category_id.append(user.prefer.through.objects.all()[i].category.id)
+            user_category_queryset = user.prefer.through.objects.filter(user_id=user.id)
+            for i in range(len(user_category_queryset)):
+                before_category_id.append(user_category_queryset[i].category.id)
             after_category_id = serializer.validated_data["category"]
 
             delete_category = list(set(before_category_id) - set(after_category_id))
