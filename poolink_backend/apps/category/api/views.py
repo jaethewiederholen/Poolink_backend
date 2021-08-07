@@ -49,7 +49,7 @@ class CategorySelectView(BaseAPIView):
             for i in range(len(before_category_id)):
                 for j in range(len(delete_category)):
                     if before_category_id[i] == delete_category[j]:
-                        user.prefer.through.objects.get(category_id=delete_category[j]).delete()
+                        user.prefer.through.objects.filter(user_id=user.id, category_id=delete_category[j]).delete()
 
             for i in add_category:
                 user.prefer.add(i)
