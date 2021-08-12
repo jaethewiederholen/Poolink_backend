@@ -12,8 +12,9 @@ class Favicon():
             print(e)
             return None
 
-        if favicons is None:
+        if favicons is None or len(favicons) == 0:
             return None
+
         else:
             favicon = None
             max = 0

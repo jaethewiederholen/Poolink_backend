@@ -1,9 +1,10 @@
+import requests
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import permission_classes
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from poolink_backend.apps.link.api.serializers import (
     LinkDestroySerializer,
@@ -43,7 +44,9 @@ class LinkView(BaseAPIView):
         paginator.page_size = 50
         page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
-        filtered_board = Board.objects.filter(category__in=user.prefer.through.objects.filter(user_id=user.id).values('category_id'))
+        filtered_board = Board.objects.filter(
+            category__in=user.prefer.through.objects.filter(user_id=user.id).values('category_id')
+        )
         links = Link.objects.filter(board__in=filtered_board, show=True)
         result = paginator.paginate_queryset(links, request)
         data_count = len(result)
@@ -74,8 +77,15 @@ class LinkView(BaseAPIView):
         if request.user == Board.objects.get(id=request.data['board']).user:
             serializer = LinkSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
-                favicon = Favicon().get_favicon(serializer.validated_data['url'])
-                meta_image = LinkImage().get_link_image(serializer.validated_data['url'])
+                response = requests.get(serializer.validated_data['url'])
+                favicon = None
+                meta_image = None
+
+                if response.headers['Content-Type'] == 'application/pdf':
+                    pass
+                else:
+                    favicon = Favicon().get_favicon(serializer.validated_data['url'])
+                    meta_image = LinkImage().get_link_image(serializer.validated_data['url'])
 
                 Link.objects.create(
                     board=serializer.validated_data['board'],
