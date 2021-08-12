@@ -19,6 +19,7 @@ from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
+from opengraph.opengraph import OpenGraph
 
 class LinkViewSet(ModelViewSet):
     permission_classes = ([IsWriterOrReadonly])
@@ -82,7 +83,17 @@ class LinkView(BaseAPIView):
             serializer = LinkSerializer(data=request.data)
             if serializer.is_valid(raise_exception=True):
                 favicon = Favicon().get_favicon(serializer.validated_data['url'])
-                meta_image = LinkImage().get_link_image(serializer.validated_data['url'])
+
+                try:
+                    image = OpenGraph(url=serializer.validated_data['url'])
+                except Exception as e:
+                    print(e)
+                    image = None
+
+                if image.image:
+                    meta_image = image.image
+                else:
+                    meta_image = None
 
                 Link.objects.create(
                     board=serializer.validated_data['board'],
