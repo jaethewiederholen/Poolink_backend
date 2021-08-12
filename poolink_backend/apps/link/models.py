@@ -1,3 +1,4 @@
+from django.core.validators import URLValidator
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -23,7 +24,8 @@ class Link(Model):
         null=False,
         max_length=255,
     )
-    url = models.URLField(
+    url = models.TextField(
+        validators=[URLValidator()],
         verbose_name=_("링크 주소"),
         help_text=_("링크의 url 주소입니다."),
         null=False,
