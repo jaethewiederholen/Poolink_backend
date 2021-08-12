@@ -26,6 +26,13 @@ class LinkViewSet(ModelViewSet):
     serializer_class = LinkSerializer
     queryset = Link.objects.filter(show=True,)
 
+    def partial_update(self, request, *args, **kwargs):
+        if "url" in request.data:
+            favicon = Favicon().get_favicon(request.data["url"])
+            meta_image = LinkImage().get_link_image(request.data["url"])
+            self.get_object().update(favicon=favicon, meta_image=meta_image)
+        return super().partial_update(request)
+
 
 class LinkView(BaseAPIView):
     allowed_method = ["DELETE", "POST", "GET"]
