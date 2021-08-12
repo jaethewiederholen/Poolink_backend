@@ -10,8 +10,10 @@ class LinkImage:
             print(e)
             return None
 
-        if image.is_valid():
+        if image.image:
             return image.image
+        else:
+            return None
 
 
 '''
