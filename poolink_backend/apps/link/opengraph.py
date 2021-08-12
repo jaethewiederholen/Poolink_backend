@@ -7,15 +7,10 @@ class LinkImage:
         try:
             meta = OpenGraph(url=url)
             return meta.image
+
         except Exception as e:
             print(e)
             return None
-
-        # if meta.image:
-        #
-        #     return meta.image
-        # else:
-        #     return None
 
 
 '''
