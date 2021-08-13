@@ -58,7 +58,6 @@ class LinkView(BaseAPIView):
         links = Link.objects.filter(board__in=filtered_board, show=True)
         result = paginator.paginate_queryset(links, request)
         data_count = len(links)
-        print("데이터 개수", data_count)
         page_count = math.ceil(data_count / 50)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,

@@ -1,3 +1,5 @@
+import math
+
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -70,11 +72,11 @@ class BoardViewSet(ModelViewSet):
     )
     def partial(self, request):
         paginator = CustomPagination()
-        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
         boards = Board.objects.filter(user_id=user.id)
         result = paginator.paginate_queryset(boards, request)
-        data_count = len(result)
+        data_count = len(boards)
+        page_count = math.ceil(data_count / 30)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,
                                                   "totalPageCount": page_count,
@@ -94,13 +96,13 @@ class MyBoardView(BaseAPIView):
     )
     def get(self, request):
         paginator = CustomPagination()
-        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
         my_board = Board.objects.filter(user_id=user.id)
         scrapped_board = self.request.user.scrap.all()
         boards = my_board | scrapped_board
         result = paginator.paginate_queryset(boards, request)
-        data_count = len(result)
+        data_count = len(boards)
+        page_count = math.ceil(data_count / 30)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,
                                                   "totalPageCount": page_count,
