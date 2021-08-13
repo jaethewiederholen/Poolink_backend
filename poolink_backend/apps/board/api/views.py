@@ -3,7 +3,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from poolink_backend.apps.board.api.serializers import (
     BoardCreateSerializer,
@@ -28,10 +28,10 @@ class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
 
-    def partial_update(self, request, *args, **kwargs):
-        if "category" in request.data:
-            self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
-        return super().partial_update(request)
+    # def partial_update(self, request, *args, **kwargs):
+    #     if "category" in request.data:
+    #         self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
+    #     return super().partial_update(request)
 
     # @action(detail=True, methods=['get', 'post'])
     # def categories(self, request, pk):
