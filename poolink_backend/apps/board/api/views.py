@@ -95,10 +95,10 @@ class MyBoardView(BaseAPIView):
         my_board = Board.objects.filter(user_id=user.id)
         scrapped_board = self.request.user.scrap.all()
 
-        my_board.union(scrapped_board)
-        result = paginator.paginate_queryset(my_board, request)
+        boards = my_board.union(scrapped_board)
+        result = paginator.paginate_queryset(boards, request)
 
-        data_count = len(my_board)
+        data_count = len(boards)
         page_count = math.ceil(data_count / 30)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,
