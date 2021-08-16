@@ -37,6 +37,9 @@ class BoardViewSet(ModelViewSet):
         board = Board.objects.get(id=board_id)
         return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
 
+    def retrieve(self, request, *args, **kwargs):
+        board = Board.objects.get(id=kwargs['pk'])
+        return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
     # @action(detail=True, methods=['get', 'post'])
     # def categories(self, request, pk):
     #     if request.method == 'GET':
@@ -65,6 +68,7 @@ class BoardViewSet(ModelViewSet):
     #
     #         result = serializers.Serializer("json", board.category.through.objects.all())
     #         return HttpResponse(result)
+
     @action(detail=False)
     @swagger_auto_schema(
         operation_id=_("Get My Board Partial Info"),
