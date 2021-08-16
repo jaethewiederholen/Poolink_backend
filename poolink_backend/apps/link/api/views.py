@@ -1,3 +1,5 @@
+import math
+
 import requests
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
@@ -49,14 +51,14 @@ class LinkView(BaseAPIView):
     def get(self, request):
         paginator = CustomPagination()
         paginator.page_size = 50
-        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
         filtered_board = Board.objects.filter(
             category__in=user.prefer.through.objects.filter(user_id=user.id).values('category_id')
         )
         links = Link.objects.filter(board__in=filtered_board, show=True)
         result = paginator.paginate_queryset(links, request)
-        data_count = len(result)
+        data_count = len(links)
+        page_count = math.ceil(data_count / 50)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,
                                                   "totalPageCount": page_count,
