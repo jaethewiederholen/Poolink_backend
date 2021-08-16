@@ -11,7 +11,6 @@ from poolink_backend.bases.api.serializers import ModelSerializer
 class BoardSerializer(ModelSerializer):
     links = LinkSerializer(many=True, read_only=True)
     board_id = serializers.SerializerMethodField()
-    # category = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
@@ -19,26 +18,6 @@ class BoardSerializer(ModelSerializer):
 
     def get_board_id(self, instance):
         return instance.id
-
-    # def get_category(self, instance):
-    #     category = instance.category.through.objects.filter(board=instance)
-    #     result = []
-    #     for i in range(len(category)):
-    #         result.append(Category.objects.get(name=category[i].category.name).pk)
-    #     return result
-    # def update(self, instance, validated_data):
-    #     try:
-    #         category_data = validated_data.pop('category')
-    #         for category in category_data:
-    #             if category in instance.category:
-    #                 pass
-    #             else:
-    #                 board_category = Category.objects.get(id=category)
-    #                 instance.category.add(board_category)
-    #     except Exception as e:
-    #         print(e)
-    #         pass
-    #     return self.update()
 
 
 class BoardUpdateSerializer(ModelSerializer):
