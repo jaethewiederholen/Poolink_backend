@@ -26,6 +26,40 @@ class BoardSerializer(ModelSerializer):
     #     for i in range(len(category)):
     #         result.append(Category.objects.get(name=category[i].category.name).pk)
     #     return result
+    # def update(self, instance, validated_data):
+    #     try:
+    #         category_data = validated_data.pop('category')
+    #         for category in category_data:
+    #             if category in instance.category:
+    #                 pass
+    #             else:
+    #                 board_category = Category.objects.get(id=category)
+    #                 instance.category.add(board_category)
+    #     except Exception as e:
+    #         print(e)
+    #         pass
+    #     return self.update()
+
+
+class BoardUpdateSerializer(ModelSerializer):
+    links = LinkSerializer(many=True, read_only=True)
+    board_id = serializers.SerializerMethodField()
+
+    category = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Board
+        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap']
+
+    def get_board_id(self, instance):
+        return instance.id
+
+    def get_category(self, instance):
+        category = instance.category.through.objects.filter(board=instance)
+        result = []
+        for i in range(len(category)):
+            result.append(Category.objects.get(name=category[i].category.name).pk)
+        return result
 
 
 class BoardCreateSerializer(ModelSerializer):
@@ -64,8 +98,8 @@ class PartialBoardSerializer(ModelSerializer):
 
 class MyBoardSerializer(ModelSerializer):
     links = LinkSerializer(many=True, read_only=True)
-    category = CategorySerializer(many=True, read_only=True)
-    # category = serializers.SerializerMethodField()
+    # category = CategorySerializer(many=True, read_only=True)
+    category = serializers.SerializerMethodField()
     board_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -75,12 +109,12 @@ class MyBoardSerializer(ModelSerializer):
     def get_board_id(self, instance):
         return instance.id
 
-    # def get_category(self, instance):
-    #     category = instance.category.through.objects.filter(board=instance)
-    #     result = []
-    #     for i in range(len(category)):
-    #         result.append(Category.objects.get(name=category[i].category.name))
-    #     return CategorySerializer(result, many=True).data
+    def get_category(self, instance):
+        category = instance.category.through.objects.filter(board=instance)
+        result = []
+        for i in range(len(category)):
+            result.append(Category.objects.get(name=category[i].category.name))
+        return CategorySerializer(result, many=True).data
 
 
 class ScrapBoardSerializer(serializers.Serializer):

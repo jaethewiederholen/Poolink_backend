@@ -11,6 +11,7 @@ from poolink_backend.apps.board.api.serializers import (
     BoardCreateSerializer,
     BoardDestroySerializer,
     BoardSerializer,
+    BoardUpdateSerializer,
     MyBoardSerializer,
     PartialBoardSerializer,
     ScrapBoardDestroySerializer,
@@ -29,6 +30,12 @@ class BoardViewSet(ModelViewSet):
     permission_classes = ([IsWriterOrReadonly])
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
+
+    def partial_update(self, request, *args, **kwargs):
+        super().partial_update(request)
+        board_id = kwargs['pk']
+        board = Board.objects.get(id=board_id)
+        return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
 
     # @action(detail=True, methods=['get', 'post'])
     # def categories(self, request, pk):
