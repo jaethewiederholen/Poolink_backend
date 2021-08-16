@@ -28,10 +28,10 @@ class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
 
-    # def partial_update(self, request, *args, **kwargs):
-    #     if "category" in request.data:
-    #         self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
-    #     return super().partial_update(request)
+    def partial_update(self, request, *args, **kwargs):
+        if "category" in request.data:
+            self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
+        return super().partial_update(request)
 
     # @action(detail=True, methods=['get', 'post'])
     # def categories(self, request, pk):
@@ -98,8 +98,8 @@ class MyBoardView(BaseAPIView):
         user = self.request.user
         my_board = Board.objects.filter(user_id=user.id)
         scrapped_board = self.request.user.scrap.all()
-        boards = my_board | scrapped_board
-        result = paginator.paginate_queryset(boards, request)
+        my_board.union(scrapped_board)
+        result = paginator.paginate_queryset(my_board, request)
         data_count = len(result)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,
