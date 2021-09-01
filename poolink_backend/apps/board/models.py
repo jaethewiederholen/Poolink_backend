@@ -44,7 +44,7 @@ class Board(Model):
         null=False,
         default=False,
     )
-    like = models.ManyToManyField(User, related_name="like", null=True,)
+
     scrap = models.ManyToManyField(User, related_name="scrap", null=True,)
     category = models.ManyToManyField(Category, related_name="board_category", null=True,)
 
