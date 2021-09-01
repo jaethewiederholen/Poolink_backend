@@ -1,14 +1,17 @@
+import math
+
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from poolink_backend.apps.board.api.serializers import (
     BoardCreateSerializer,
     BoardDestroySerializer,
     BoardSerializer,
+    BoardUpdateSerializer,
     MyBoardSerializer,
     PartialBoardSerializer,
     ScrapBoardDestroySerializer,
@@ -29,10 +32,14 @@ class BoardViewSet(ModelViewSet):
     queryset = Board.objects.all()
 
     def partial_update(self, request, *args, **kwargs):
-        if "category" in request.data:
-            self.get_object().update(image=Category.objects.get(id=request.data["category"][0]).image)
-        return super().partial_update(request)
+        super().partial_update(request)
+        board_id = kwargs['pk']
+        board = Board.objects.get(id=board_id)
+        return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
 
+    def retrieve(self, request, *args, **kwargs):
+        board = Board.objects.get(id=kwargs['pk'])
+        return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
     # @action(detail=True, methods=['get', 'post'])
     # def categories(self, request, pk):
     #     if request.method == 'GET':
@@ -61,6 +68,7 @@ class BoardViewSet(ModelViewSet):
     #
     #         result = serializers.Serializer("json", board.category.through.objects.all())
     #         return HttpResponse(result)
+
     @action(detail=False)
     @swagger_auto_schema(
         operation_id=_("Get My Board Partial Info"),
@@ -70,11 +78,11 @@ class BoardViewSet(ModelViewSet):
     )
     def partial(self, request):
         paginator = CustomPagination()
-        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
         boards = Board.objects.filter(user_id=user.id)
         result = paginator.paginate_queryset(boards, request)
-        data_count = len(result)
+        data_count = len(boards)
+        page_count = math.ceil(data_count / 30)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,
                                                   "totalPageCount": page_count,
@@ -94,13 +102,15 @@ class MyBoardView(BaseAPIView):
     )
     def get(self, request):
         paginator = CustomPagination()
-        page_count = paginator.get_page_number(request, paginator=paginator)
         user = self.request.user
         my_board = Board.objects.filter(user_id=user.id)
         scrapped_board = self.request.user.scrap.all()
-        boards = my_board | scrapped_board
+
+        boards = my_board.union(scrapped_board)
         result = paginator.paginate_queryset(boards, request)
-        data_count = len(result)
+
+        data_count = len(boards)
+        page_count = math.ceil(data_count / 30)
 
         return Response(status=HTTP_200_OK, data={"dataCount": data_count,
                                                   "totalPageCount": page_count,

@@ -5,8 +5,9 @@ class LinkImage:
 
     def get_link_image(self, url):
         try:
-            image = OpenGraph(url=url)
-            return image.image
+            meta = OpenGraph(url=url)
+            return meta.image
+
         except Exception as e:
             print(e)
             return None

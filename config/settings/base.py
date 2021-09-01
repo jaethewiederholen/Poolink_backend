@@ -5,6 +5,7 @@ Base settings to build other settings files upon.
 # ------------------------------------------------------------------------------
 from datetime import timedelta
 from pathlib import Path
+from typing import List
 
 import environ
 
@@ -13,10 +14,49 @@ ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 APPS_DIR = ROOT_DIR / "poolink_backend"
 env = environ.Env()
 
-READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=True)
-if READ_DOT_ENV_FILE:
-    # OS environment variables take precedence over variables from .env
-    env.read_env(str(ROOT_DIR / ".env"))
+# ENVIRONMENT
+# ------------------------------------------------------------------------------
+DJANGO_SETTINGS_MODULE = env("DJANGO_SETTINGS_MODULE")
+DJANOG_ENV = DJANGO_SETTINGS_MODULE.split(".")[-1]  # config.settigns.[env]
+print(f"Reading configuration file for {DJANOG_ENV} settings")
+
+# If current environment is local, read all files in .envs/.local to make it handy
+# of using other environment variables. Also, read .env file by default too.
+#
+# Note: OS environment variables take precedence over variables from .env
+env_files_to_read: List[Path] = []
+
+if DJANOG_ENV == "local":
+    local_env_dir = ROOT_DIR / ".envs" / ".local"
+    if local_env_dir.exists():
+        env_files_to_read.extend(local_env_dir.iterdir())
+
+    READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=True)
+    if READ_DOT_ENV_FILE:
+        dot_env_file = ROOT_DIR / ".env"
+        env_files_to_read.append(dot_env_file)
+    else:
+        django_env_file = ROOT_DIR / ".envs" / f".{DJANOG_ENV}" / ".django"
+        env_files_to_read.append(django_env_file)
+
+    files_not_exist = []
+    for f in env_files_to_read:
+        if f.exists():
+            print(f"Reading environments from {f!s}")
+            env.read_env(str(f))
+        else:
+            files_not_exist.append(f)
+    if files_not_exist:
+        print(
+            "couldn't read files ({}) since not exists: {}".format(
+                len(files_not_exist), ", ".join(map(str, files_not_exist))
+            )
+        )
+
+# READ_DOT_ENV_FILE = env.bool("DJANGO_READ_DOT_ENV_FILE", default=True)
+# if READ_DOT_ENV_FILE:
+#     # OS environment variables take precedence over variables from .env
+#     env.read_env(str(ROOT_DIR / ".env"))
 
 # GENERAL
 # ------------------------------------------------------------------------------
@@ -318,8 +358,9 @@ CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
 
                         'http://localhost:3000',
                         'https://127.0.0.1:3000',
-                        'https://localhost:3000',]
-CORS_ALLOW_CREDENTIALS=True
+                        'https://localhost:3000',
+                        ]
+CORS_ALLOW_CREDENTIALS = True
 
 # Google Login
 SOCIAL_AUTH_GOOGLE_CLIENT_ID = env("SOCIAL_AUTH_GOOGLE_CLIENT_ID")

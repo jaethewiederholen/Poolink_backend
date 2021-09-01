@@ -37,17 +37,19 @@ class Link(Model):
         null=False,
         default=True,
     )
-    favicon = models.URLField(
+    favicon = models.TextField(
         verbose_name=_("링크 파비콘"),
         help_text=_("링크의 파비콘(favicon)입니다."),
         null=True,
         blank=True,
+        max_length=1000,
     )
-    meta_image = models.URLField(
+    meta_image = models.TextField(
         verbose_name=_("링크 미리보기 이미지"),
         help_text=_("링크의 미리보기 이미지입니다."),
         null=True,
         blank=True,
+        max_length=1000,
     )
 
     class Meta:
