@@ -46,7 +46,7 @@ class UserLoginSuccessSerializer(UserSerializer):
         )
 
     def get_token(self, obj):
-        return obj.token.key
+        return obj.access_token
 
     def get_user_id(self, instance):
         return instance.id
