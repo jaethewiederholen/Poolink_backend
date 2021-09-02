@@ -191,7 +191,10 @@ class UserLogoutView(BaseAPIView):
     )
     def post(self, request):
         logout(request)
-        return Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
+        reset = ''
+        res = Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
+        res.set_cookie('access_token', reset)
+        return res
 
 
 class UserDeleteView(BaseAPIView):
