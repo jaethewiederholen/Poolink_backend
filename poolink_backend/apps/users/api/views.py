@@ -22,13 +22,16 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateMode
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
     DuplicateCheckSerializer,
     GoogleLoginSerializer,
     SignupSerializer,
-    UserLoginSuccessSerializer,
+    UserLoginSuccessSerializer, CustomTokenRefreshSerializer,
 )
 from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -74,9 +77,6 @@ GOOGLE_CALLBACK_URI = BASE_URL + 'google/callback/'
 
 
 def google_login(request):
-    """
-    Code Request
-    """
     scope = "https://www.googleapis.com/auth/userinfo.email"
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
     return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?client_id="
@@ -87,9 +87,6 @@ def google_callback(request):
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
     client_secret = settings.SOCIAL_AUTH_GOOGLE_SECRET
     code = request.GET.get('code')
-    """
-    Access Token Request
-    """
     token_req = requests.post(
         f"https://oauth2.googleapis.com/token?client_id={client_id}&client_secret="
         f"{client_secret}&code={code}&grant_type=authorization_code&redirect_uri={GOOGLE_CALLBACK_URI}&state={state}")
@@ -133,21 +130,27 @@ class GoogleLogin(SocialLoginView):
         result["name"] = user[0].name
         result["email"] = email
         result["prefer"] = user[0].prefer.through.objects.filter(user=response.data["user"]["pk"])
-        result["token"] = response.data["access_token"]
+        # result["token"] = response.data["access_token"]
 
-        # if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
-        #     user_refresh = OutstandingToken.objects.filter(user=user)
-        #     if user_refresh.count() > 1:
-        #         last_refresh = user_refresh.order_by('-created_at')[1].token
-        #         blacklist_refresh = RefreshToken(last_refresh)
-        #         try:
-        #             blacklist_refresh.blacklist()
-        #         except AttributeError:
-        #             pass
+        if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+            user_refresh = OutstandingToken.objects.filter(user=user)
+            if user_refresh.count() > 1:
+                last_refresh = user_refresh.order_by('-created_at')[1].token
+                blacklist_refresh = RefreshToken(last_refresh)
+                try:
+                    blacklist_refresh.blacklist()
+                except AttributeError:
+                    pass
 
-        return Response(result)
+        res = Response(result)
+        res.set_cookie('access_token', response.data["access_token"], httponly=True)
+        return res
 
     adapter_class = google_view.GoogleOAuth2Adapter
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):

@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from poolink_backend.apps.users.models import Path
 from poolink_backend.bases.api.serializers import ModelSerializer
@@ -80,3 +81,14 @@ class SignupSerializer(serializers.Serializer):
         min_length=None,
         trim_whitespace=True
     )
+
+
+class CustomTokenRefreshSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+    access_token = serializers.ReadOnlyField()
+
+    def validate(self, attrs):
+        refresh = RefreshToken(attrs['refresh_token'])
+
+        data = {'access_token': str(refresh.access_token)}
+        return data
