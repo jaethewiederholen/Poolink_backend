@@ -32,7 +32,7 @@ class TokenSerializer(ModelSerializer):
 
 
 class UserLoginSuccessSerializer(UserSerializer):
-    token = serializers.SerializerMethodField()
+    # token = serializers.SerializerMethodField()
     user_id = serializers.SerializerMethodField()
 
     class Meta:
@@ -43,11 +43,10 @@ class UserLoginSuccessSerializer(UserSerializer):
             "name",
             "email",
             "prefer",
-            "token",
         )
 
-    def get_token(self, obj):
-        return obj.access_token
+    # def get_token(self, obj):
+    #     return obj.access_token
 
     def get_user_id(self, instance):
         return instance.id

@@ -118,19 +118,13 @@ class GoogleLogin(SocialLoginView):
         return super().post
 
     def get_response(self):
-        result = {}
         self.exception()
         email = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email']
         username = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email'].split('@')[0]
         user = User.objects.update_or_create(email=email, username=username)
         response = super().get_response()
 
-        result["user_id"] = response.data["user"]["pk"]
-        result["username"] = username
-        result["name"] = user[0].name
-        result["email"] = email
-        result["prefer"] = user[0].prefer.through.objects.filter(user=response.data["user"]["pk"])
-        # result["token"] = response.data["access_token"]
+        result = User.objects.update_or_create(email=email, username=username, )
 
         if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
             user_refresh = OutstandingToken.objects.filter(user=user)
@@ -142,7 +136,7 @@ class GoogleLogin(SocialLoginView):
                 except AttributeError:
                     pass
 
-        res = Response(result)
+        res = Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(result[0]).data)
         res.set_cookie('access_token', response.data["access_token"], httponly=True)
         return res
 
