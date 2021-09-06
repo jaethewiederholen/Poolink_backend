@@ -10,7 +10,7 @@
     <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="ignoredPackages">
         <value>
-          <list size="229">
+          <list size="230">
             <item index="0" class="java.lang.String" itemvalue="bs4" />
             <item index="1" class="java.lang.String" itemvalue="astroid" />
             <item index="2" class="java.lang.String" itemvalue="MarkupSafe" />
@@ -240,6 +240,7 @@
             <item index="226" class="java.lang.String" itemvalue="Flask-Login" />
             <item index="227" class="java.lang.String" itemvalue="traitlets" />
             <item index="228" class="java.lang.String" itemvalue="djangorestframework-simplejwt" />
+            <item index="229" class="java.lang.String" itemvalue="wcwidth" />
           </list>
         </value>
       </option>
