@@ -138,6 +138,7 @@ class GoogleLogin(SocialLoginView):
 
         res = Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(result[0]).data)
         res.set_cookie('access_token', response.data["access_token"], httponly=True)
+        res.set_cookie('refresh_token', response.data["refresh_token"], httponly=True)
         return res
 
     adapter_class = google_view.GoogleOAuth2Adapter
