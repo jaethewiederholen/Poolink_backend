@@ -1,10 +1,7 @@
-import json
 from json.decoder import JSONDecodeError
 
 import requests
-from allauth.socialaccount.models import SocialAccount
 from allauth.socialaccount.providers.google import views as google_view
-from allauth.socialaccount.providers.oauth2.client import OAuth2Client
 from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import logout
 from django.http import JsonResponse
@@ -22,16 +19,14 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateMode
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.views import TokenViewBase
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
     DuplicateCheckSerializer,
-    GoogleLoginSerializer,
     SignupSerializer,
-    UserLoginSuccessSerializer, CustomTokenRefreshSerializer,
+    CustomTokenRefreshSerializer, UserLoginSuccessSerializer
 )
 from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -121,31 +116,62 @@ class GoogleLogin(SocialLoginView):
         self.exception()
         email = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email']
         username = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email'].split('@')[0]
-        user = User.objects.update_or_create(email=email, username=username)
+        user = User.objects.update_or_create(email=email, username=username)[0]
         response = super().get_response()
 
-        result = User.objects.update_or_create(email=email, username=username, )
+        prefer = []
+        for i in range(len(user.prefer.through.objects.filter(user=user))):
+            prefer.append(user.prefer.through.objects.filter(user=user)[i].category.id)
 
-        if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
-            user_refresh = OutstandingToken.objects.filter(user=user)
-            if user_refresh.count() > 1:
-                last_refresh = user_refresh.order_by('-created_at')[1].token
-                blacklist_refresh = RefreshToken(last_refresh)
-                try:
-                    blacklist_refresh.blacklist()
-                except AttributeError:
-                    pass
+        result = {}
+        result["user_id"] = user.id
+        result["username"] = user.username
+        result["name"] = user.name
+        result["email"] = user.email
+        result["prefer"] = prefer
+        result["refresh_token"] = response.data["refresh_token"]
 
-        res = Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(result[0]).data)
+        res = Response(status=HTTP_200_OK, data=result)
         res.set_cookie('access_token', response.data["access_token"], httponly=True)
-        res.set_cookie('refresh_token', response.data["refresh_token"], httponly=True)
         return res
+
+        # result = User.objects.update_or_create(email=email, username=username, )
+        #
+        # if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+        #     user_refresh = OutstandingToken.objects.filter(user=user)
+        #     if user_refresh.count() > 1:
+        #         last_refresh = user_refresh.order_by('-created_at')[1].token
+        #         blacklist_refresh = RefreshToken(last_refresh)
+        #         try:
+        #             blacklist_refresh.blacklist()
+        #         except AttributeError:
+        #             pass
+        #
+        # refresh_token = response.data["refresh_token"]
+        #
+        # res = Response(status=HTTP_200_OK, data=
+        # [UserLoginSuccessSerializer(result[0]).data,
+        #  {"refresh_token": refresh_token}])
+        # res.set_cookie('access_token', response.data["access_token"], httponly=True)
+        # return res
 
     adapter_class = google_view.GoogleOAuth2Adapter
 
 
-class CustomTokenRefreshView(TokenRefreshView):
+class CustomTokenRefreshView(TokenViewBase):
     serializer_class = CustomTokenRefreshSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        res = Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("토큰 재발급 완료")}).data)
+        res.set_cookie('access_token', serializer.validated_data["access_token"], httponly=True)
+        return res
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):

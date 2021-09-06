@@ -1,3 +1,4 @@
+from dj_rest_auth.views import LoginView
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
@@ -50,6 +51,10 @@ class UserLoginSuccessSerializer(UserSerializer):
 
     def get_user_id(self, instance):
         return instance.id
+
+    # def get_refresh_token(self, instance):
+    #     refresh_token =
+    #     return refresh_token
 
 
 class DuplicateCheckSerializer(ModelSerializer):
