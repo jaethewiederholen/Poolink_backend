@@ -25,10 +25,10 @@ class Link(Model):
         max_length=255,
     )
     url = models.TextField(
+        validators=[URLValidator()],
         verbose_name=_("링크 주소"),
         help_text=_("링크의 url 주소입니다."),
         null=False,
-        validators=[URLValidator()],
     )
     alarm = models.DateTimeField(null=True, blank=True)
     show = models.BooleanField(

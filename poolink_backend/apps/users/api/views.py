@@ -1,3 +1,4 @@
+import json
 from json.decoder import JSONDecodeError
 
 import requests
@@ -21,13 +22,16 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateMode
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
     DuplicateCheckSerializer,
     GoogleLoginSerializer,
     SignupSerializer,
-    UserLoginSuccessSerializer,
+    UserLoginSuccessSerializer, CustomTokenRefreshSerializer,
 )
 from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -40,42 +44,39 @@ BASE_URL = 'http://localhost:8000/'
 GOOGLE_CALLBACK_URI = BASE_URL + 'google/callback/'
 
 
-@swagger_auto_schema(
-    method="POST",
-    operation_id="users-login-google",
-    operation_description=_(""),
-    request_body=GoogleLoginSerializer,
-    responses={
-        HTTP_200_OK: UserLoginSuccessSerializer,
-    },
-    tags=[_("로그인")],
-)
-@api_view(("POST",))
-@authentication_classes([])
-@permission_classes([])
-def google_login_view(request):
-    serializer = GoogleLoginSerializer(data=request.data)
-    if serializer.is_valid(raise_exception=True):
-        access_token = serializer.validated_data["access_token"]
-        email_req = requests.get(
-            f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
-        email_req_status = email_req.status_code
-
-        if email_req_status != 200:
-            return Response({'err_msg': 'failed to get email'}, status=status.HTTP_400_BAD_REQUEST)
-        email_req_json = email_req.json()
-        email = email_req_json.get('email')
-
-        user, created = User.objects.update_or_create(
-            email=email,
-        )
-        return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
+# @swagger_auto_schema(
+#     method="POST",
+#     operation_id="users-login-google",
+#     operation_description=_(""),
+#     request_body=GoogleLoginSerializer,
+#     responses={
+#         HTTP_200_OK: UserLoginSuccessSerializer,
+#     },
+#     tags=[_("로그인")],
+# )
+# @api_view(("POST",))
+# @authentication_classes([])
+# @permission_classes([])
+# def google_login_view(request):
+#     serializer = GoogleLoginSerializer(data=request.data)
+#     if serializer.is_valid(raise_exception=True):
+#         access_token = serializer.validated_data["access_token"]
+#         email_req = requests.get(
+#             f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
+#         email_req_status = email_req.status_code
+#
+#         if email_req_status != 200:
+#             return Response({'err_msg': 'failed to get email'}, status=status.HTTP_400_BAD_REQUEST)
+#         email_req_json = email_req.json()
+#         email = email_req_json.get('email')
+#
+#         user, created = User.objects.update_or_create(
+#             email=email,
+#         )
+#         return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
 
 
 def google_login(request):
-    """
-    Code Request
-    """
     scope = "https://www.googleapis.com/auth/userinfo.email"
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
     return redirect(f"https://accounts.google.com/o/oauth2/v2/auth?client_id="
@@ -86,9 +87,6 @@ def google_callback(request):
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
     client_secret = settings.SOCIAL_AUTH_GOOGLE_SECRET
     code = request.GET.get('code')
-    """
-    Access Token Request
-    """
     token_req = requests.post(
         f"https://oauth2.googleapis.com/token?client_id={client_id}&client_secret="
         f"{client_secret}&code={code}&grant_type=authorization_code&redirect_uri={GOOGLE_CALLBACK_URI}&state={state}")
@@ -97,56 +95,56 @@ def google_callback(request):
     if error is not None:
         raise JSONDecodeError(error)
     access_token = token_req_json.get('access_token')
-    print("access token: " + access_token)
-    """
-    Email Request
-    """
-    email_req = requests.get(
-        f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
-    email_req_status = email_req.status_code
-    if email_req_status != 200:
-        return JsonResponse({'err_msg': 'failed to get email'}, status=status.HTTP_400_BAD_REQUEST)
-    email_req_json = email_req.json()
-    email = email_req_json.get('email')
-    """
-    Signup or Signin Request
-    """
-    try:
-        user = User.objects.get(email=email)
-        # 기존에 가입된 유저의 Provider가 google이 아니면 에러 발생, 맞으면 로그인
-        # 다른 SNS로 가입된 유저
-        social_user = SocialAccount.objects.get(user=user)
-        if social_user is None:
-            return JsonResponse({'err_msg': 'email exists but not social user'}, status=status.HTTP_400_BAD_REQUEST)
-        if social_user.provider != 'google':
-            return JsonResponse({'err_msg': 'no matching social type'}, status=status.HTTP_400_BAD_REQUEST)
-        # 기존에 Google로 가입된 유저
-        data = {'access_token': access_token, 'code': code}
-        accept = requests.post(
-            f"{BASE_URL}google/login/finish/", data=data)
-        accept_status = accept.status_code
-        if accept_status != 200:
-            return JsonResponse({'err_msg': 'failed to signin'}, status=accept_status)
-        accept_json = accept.json()
-        accept_json.pop('user', None)
-        return JsonResponse(accept_json)
-    except User.DoesNotExist:
-        # 기존에 가입된 유저가 없으면 새로 가입
-        data = {'access_token': access_token, 'code': code}
-        accept = requests.post(
-            f"{BASE_URL}google/login/finish/", data=data)
-        accept_status = accept.status_code
-        if accept_status != 200:
-            return JsonResponse({'err_msg': 'failed to signup'}, status=accept_status)
-        accept_json = accept.json()
-        accept_json.pop('user', None)
-        return JsonResponse(accept_json)
+    return JsonResponse({"access_token": access_token}, json_dumps_params={'ensure_ascii': False})
 
 
 class GoogleLogin(SocialLoginView):
+    def check_email(self):
+        access_token = self.request.data['access_token']
+        profile_request = requests.get(
+            "https://www.googleapis.com/oauth2/v2/userinfo", headers={"Authorization": f"Bearer {access_token}"})
+        profile_json = profile_request.json()
+        email = profile_json.get('email')
+        user = User.objects.filter(email=email)
+        if user.exists():
+            return True
+        else:
+            return False
+
+    def exception(self):
+        is_email_user = self.check_email()
+        if not is_email_user:
+            return JsonResponse({"err_msg": "email already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        return super().post
+
+    def get_response(self):
+        self.exception()
+        email = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email']
+        username = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email'].split('@')[0]
+        user = User.objects.update_or_create(email=email, username=username)
+        response = super().get_response()
+
+        result = User.objects.update_or_create(email=email, username=username, )
+
+        if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+            user_refresh = OutstandingToken.objects.filter(user=user)
+            if user_refresh.count() > 1:
+                last_refresh = user_refresh.order_by('-created_at')[1].token
+                blacklist_refresh = RefreshToken(last_refresh)
+                try:
+                    blacklist_refresh.blacklist()
+                except AttributeError:
+                    pass
+
+        res = Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(result[0]).data)
+        res.set_cookie('access_token', response.data["access_token"], httponly=True)
+        return res
+
     adapter_class = google_view.GoogleOAuth2Adapter
-    callback_url = GOOGLE_CALLBACK_URI
-    client_class = OAuth2Client
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    serializer_class = CustomTokenRefreshSerializer
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
@@ -187,7 +185,10 @@ class UserLogoutView(BaseAPIView):
     )
     def post(self, request):
         logout(request)
-        return Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
+        reset = ''
+        res = Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
+        res.set_cookie('access_token', reset)
+        return res
 
 
 class UserDeleteView(BaseAPIView):

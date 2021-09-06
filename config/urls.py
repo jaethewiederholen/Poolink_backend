@@ -25,7 +25,6 @@ urlpatterns = [
     path('users/', include('dj_rest_auth.registration.urls')),
     path('google/login', views.google_login, name='google_login'),
     path('google/callback/', views.google_callback, name='google_callback'),
-    path('google/login/finish/', views.GoogleLogin.as_view(), name='google_login_todjango'),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
