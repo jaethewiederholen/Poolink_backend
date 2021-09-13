@@ -1,4 +1,3 @@
-from dj_rest_auth.views import LoginView
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 from rest_framework.authtoken.models import Token
@@ -15,7 +14,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["user_id", "username", "name", "email", "prefer"]
+        fields = ["user_id", "username", "name", "email", "prefer", "is_agreed_to_terms", ]
 
     def get_user_id(self, instance):
         return instance.id
@@ -44,6 +43,7 @@ class UserLoginSuccessSerializer(UserSerializer):
             "name",
             "email",
             "prefer",
+            "is_agreed_to_terms",
         )
 
     # def get_token(self, obj):

@@ -92,6 +92,11 @@ class User(AbstractBaseUser, Model, PermissionsMixin):
         verbose_name=_("is_superuser"),
         default=False,
     )
+    is_agreed_to_terms = models.BooleanField(
+        _("약관동의여부"),
+        help_text=_("이용약관에 동의하였는지 여부를 나타냅니다."),
+        default=False,
+    )
 
     objects = UserManager()
     USERNAME_FIELD = "username"
