@@ -52,9 +52,9 @@ class Board(Model):
         verbose_name = verbose_name_plural = _("보드")
         ordering = ['-id']
 
-    @property
-    def like_count(self):
-        return self.like.count()
+    # @property
+    # def like_count(self):
+    #     return self.like.count()
 
     @property
     def scrap_count(self):
