@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import List
 
 import environ
+from corsheaders.defaults import default_methods
 
 ROOT_DIR = Path(__file__).resolve(strict=True).parent.parent.parent
 # poolink_backend/
@@ -347,22 +348,26 @@ REST_FRAMEWORK = {
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
-SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
-    'ROTATE_REFRESH_TOKENS': False,
-    # 'BLACKLIST_AFTER_ROTATION': True,
-    }
-CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
 
-                        'http://localhost:3000',
-                        'https://127.0.0.1:3000',
-                        'https://localhost:3000',
-                        ]
+#                         'http://localhost:3000',
+#                         'https://127.0.0.1:3000',
+#                         'https://localhost:3000',
+#                         ]
+
+CORS_ALLOW_METHDOS = default_methods
 CORS_ALLOW_CREDENTIALS = True
 
 # Google Login
 SOCIAL_AUTH_GOOGLE_CLIENT_ID = env("SOCIAL_AUTH_GOOGLE_CLIENT_ID")
 SOCIAL_AUTH_GOOGLE_SECRET = env("SOCIAL_AUTH_GOOGLE_SECRET")
 STATE = env("STATE")
+
+# Simpot JWT
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=2),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    # 'BLACKLIST_AFTER_ROTATION': True,
+    }
