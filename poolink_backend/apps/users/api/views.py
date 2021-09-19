@@ -132,7 +132,7 @@ class GoogleLogin(SocialLoginView):
         result["refresh_token"] = response.data["refresh_token"]
 
         res = Response(status=HTTP_200_OK, data=result)
-        res.set_cookie('access_token', response.data["access_token"], httponly=True)
+        res.set_cookie('access_token', response.data["access_token"], httponly=False)
         return res
 
         # result = User.objects.update_or_create(email=email, username=username, )
