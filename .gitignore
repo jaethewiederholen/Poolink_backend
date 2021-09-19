@@ -152,7 +152,7 @@ typings/
 
 ### VisualStudioCode template
 .vscode/*
-!.vscode/settings.json
+.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
@@ -328,7 +328,7 @@ poolink_backend/media/
 
 #env file
 .env
-.envs/.local/
+.envs/.local/*
 
 # pre-commit file
 .pre-commit-config.yaml
@@ -340,4 +340,3 @@ config.media.*
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
-
