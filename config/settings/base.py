@@ -370,8 +370,8 @@ SIMPLE_JWT = {
     # 'BLACKLIST_AFTER_ROTATION': True,
     }
 
-SESSION_COOKIE_DOMAIN = ['.poolink.io', 'localhost']
-CSRF_COOKIE_DOMAIN = ['.poolink.io', 'localhost']
+SESSION_COOKIE_DOMAIN = '.poolink.io'
+CSRF_COOKIE_DOMAIN = '.poolink.io'
 CSRF_TRUSTED_ORIGINS = ['.poolink.io']
 
 CSRF_COOKIE_SAMESITE = 'None'
