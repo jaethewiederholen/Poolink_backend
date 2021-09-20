@@ -371,3 +371,4 @@ SIMPLE_JWT = {
     }
 
 SESSION_COOKIE_DOMAIN = '.poolink.io'
+CSRF_COOKIE_DOMAIN = '.poolink.io'
