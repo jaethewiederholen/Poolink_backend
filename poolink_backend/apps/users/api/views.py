@@ -130,12 +130,13 @@ class GoogleLogin(SocialLoginView):
         result["name"] = user.name
         result["email"] = user.email
         result["prefer"] = prefer
+        result["access_token"] = response.data["access_token"]
         result["refresh_token"] = response.data["refresh_token"]
 
         res = Response(status=HTTP_200_OK, data=result)
-        res.set_cookie('access_token', response.data["access_token"], httponly=True,
-                       domain=".poolink.io")
-        res['access-control-expose-headers'] = 'Set-Cookie'
+        # res.set_cookie('access_token', response.data["access_token"], httponly=True,
+        #                domain=".poolink.io")
+        # res['access-control-expose-headers'] = 'Set-Cookie'
         return res
 
         # result = User.objects.update_or_create(email=email, username=username, )
@@ -173,7 +174,7 @@ class CustomTokenRefreshView(TokenViewBase):
             raise InvalidToken(e.args[0])
 
         res = Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("토큰 재발급 완료")}).data)
-        res.set_cookie('access_token', serializer.validated_data["access_token"], httponly=True)
+        # res.set_cookie('access_token', serializer.validated_data["access_token"], httponly=True)
         return res
 
 
@@ -215,9 +216,13 @@ class UserLogoutView(BaseAPIView):
     )
     def post(self, request):
         logout(request)
-        reset = ''
+        # reset = ''
         res = Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
-        res.set_cookie('access_token', reset)
+        # res.set_cookie('access_token', reset)
+        # res.delete_cookie('access_token')
+        # res.delete_cookie('messages')
+        # res.delete_cookie('csrftoken')
+        # res.delete_cookie('sessionid')
         return res
 
 
