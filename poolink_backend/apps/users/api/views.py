@@ -7,6 +7,7 @@ from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.translation import ugettext_lazy as _
+from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -88,6 +89,7 @@ def google_callback(request):
     return JsonResponse({"access_token": access_token}, json_dumps_params={'ensure_ascii': False})
 
 
+@csrf_exempt
 class GoogleLogin(SocialLoginView):
     def check_email(self):
         access_token = self.request.data['access_token']
@@ -127,7 +129,7 @@ class GoogleLogin(SocialLoginView):
         result["refresh_token"] = response.data["refresh_token"]
 
         res = Response(status=HTTP_200_OK, data=result)
-        res.set_cookie('access_token', response.data["access_token"], httponly=True, secure=True,
+        res.set_cookie('access_token', response.data["access_token"], httponly=True,
                        domain=".poolink.io")
         res['access-control-expose-headers'] = 'Set-Cookie'
         return res
