@@ -10,11 +10,6 @@ from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.decorators import (
-    api_view,
-    authentication_classes,
-    permission_classes,
-)
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
@@ -24,9 +19,9 @@ from rest_framework_simplejwt.views import TokenViewBase
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
+    CustomTokenRefreshSerializer,
     DuplicateCheckSerializer,
     SignupSerializer,
-    CustomTokenRefreshSerializer, UserLoginSuccessSerializer
 )
 from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -35,7 +30,7 @@ from poolink_backend.bases.api.views import APIView as BaseAPIView
 from .serializers import UserSerializer
 
 state = settings.STATE
-BASE_URL = 'http://localhost:8000/'
+BASE_URL = settings.GOOGLE_BASE_URL
 GOOGLE_CALLBACK_URI = BASE_URL + 'google/callback/'
 
 
