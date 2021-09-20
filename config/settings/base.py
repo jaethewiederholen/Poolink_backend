@@ -369,3 +369,5 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': False,
     # 'BLACKLIST_AFTER_ROTATION': True,
     }
+
+SESSION_COOKIE_DOMAIN = '.poolink.io'
