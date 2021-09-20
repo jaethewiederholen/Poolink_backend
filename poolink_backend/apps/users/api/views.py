@@ -127,7 +127,7 @@ class GoogleLogin(SocialLoginView):
         result["refresh_token"] = response.data["refresh_token"]
 
         res = Response(status=HTTP_200_OK, data=result)
-        res.set_cookie('access_token', response.data["access_token"], httponly=False)
+        res.set_cookie('access_token', response.data["access_token"], httponly=False, secure=True)
         res['access-control-expose-headers'] = 'Set-Cookie'
         return res
 
