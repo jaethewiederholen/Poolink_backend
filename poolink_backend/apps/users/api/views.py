@@ -6,9 +6,7 @@ from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -16,8 +14,7 @@ from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateMode
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.views import TokenViewBase, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
@@ -91,9 +88,6 @@ def google_callback(request):
 
 
 class GoogleLogin(SocialLoginView):
-    @method_decorator(csrf_exempt)
-    def dispatch(self, request, *args, **kwargs):
-        return super(GoogleLogin, self).dispatch(request, *args, **kwargs)
 
     def check_email(self):
         access_token = self.request.data['access_token']
