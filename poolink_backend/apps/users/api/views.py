@@ -89,7 +89,6 @@ def google_callback(request):
     return JsonResponse({"access_token": access_token}, json_dumps_params={'ensure_ascii': False})
 
 
-@csrf_exempt
 class GoogleLogin(SocialLoginView):
     def check_email(self):
         access_token = self.request.data['access_token']
@@ -109,6 +108,7 @@ class GoogleLogin(SocialLoginView):
             return JsonResponse({"err_msg": "email already exists."}, status=status.HTTP_400_BAD_REQUEST)
         return super().post
 
+    @csrf_exempt
     def get_response(self):
         self.exception()
         email = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email']
