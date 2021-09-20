@@ -17,7 +17,7 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.views import TokenViewBase
+from rest_framework_simplejwt.views import TokenViewBase, TokenRefreshView
 
 from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
@@ -162,20 +162,8 @@ class GoogleLogin(SocialLoginView):
     adapter_class = google_view.GoogleOAuth2Adapter
 
 
-class CustomTokenRefreshView(TokenViewBase):
+class CustomTokenRefreshView(TokenRefreshView):
     serializer_class = CustomTokenRefreshSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-
-        try:
-            serializer.is_valid(raise_exception=True)
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
-
-        res = Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("토큰 재발급 완료")}).data)
-        # res.set_cookie('access_token', serializer.validated_data["access_token"], httponly=True)
-        return res
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
