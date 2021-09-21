@@ -336,9 +336,9 @@ STATICFILES_FINDERS += ["compressor.finders.CompressorFinder"]
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
         'rest_framework.authentication.TokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-        'dj_rest_auth.jwt_auth.JWTCookieAuthentication',
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     'DEFAULT_PAGINATION_CLASS': 'poolink_backend.apps.pagination.CustomPagination',
@@ -348,12 +348,12 @@ REST_FRAMEWORK = {
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
+# CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
 
-                        'http://localhost:3000',
-                        'https://127.0.0.1:3000',
-                        'https://localhost:3000',
-                        ]
+#                         'http://localhost:3000',
+#                         'https://127.0.0.1:3000',
+#                         'https://localhost:3000',
+#                         ]
 CORS_ALLOW_CREDENTIALS = True
 
 # Google Login
