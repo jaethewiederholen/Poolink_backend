@@ -23,7 +23,7 @@ from config.settings import base as settings
 from poolink_backend.apps.users.api.serializers import (
     CustomTokenRefreshSerializer,
     DuplicateCheckSerializer,
-    SignupSerializer,
+    SignupSerializer, LogoutSerializer,
 )
 from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -197,6 +197,7 @@ class UserLogoutView(BaseAPIView):
     @swagger_auto_schema(
         operation_id=_("Logout User"),
         operation_description=_("유저 로그아웃"),
+        request_body=LogoutSerializer,
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
         tags=[_("로그아웃, 탈퇴"), ],
     )
@@ -206,9 +207,11 @@ class UserLogoutView(BaseAPIView):
             refresh_token = request.data["refresh_token"]
             token = RefreshToken(refresh_token)
             token.blacklist()
-            return Response(status=status.HTTP_205_RESET_CONTENT)
+            return Response(status=status.HTTP_205_RESET_CONTENT,
+                            data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
 
         except Exception as e:
+            print(str(e))
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
     # def post(self, request):
