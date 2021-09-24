@@ -13,10 +13,12 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenViewBase, TokenRefreshView
 
 from config.settings import base as settings
@@ -195,6 +197,7 @@ class UserSignupView(BaseAPIView):
 
 class UserLogoutView(BaseAPIView):
     allowed_method = "POST"
+    permission_classes = (IsAuthenticated,)
 
     @swagger_auto_schema(
         operation_id=_("Logout User"),
@@ -203,15 +206,23 @@ class UserLogoutView(BaseAPIView):
         tags=[_("로그아웃, 탈퇴"), ],
     )
     def post(self, request):
-        logout(request)
-        # reset = ''
-        res = Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
-        # res.set_cookie('access_token', reset)
-        # res.delete_cookie('access_token')
-        # res.delete_cookie('messages')
-        # res.delete_cookie('csrftoken')
-        # res.delete_cookie('sessionid')
-        return res
+        try:
+            logout(request)
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    # def post(self, request):
+    #     logout(request)
+    #     # reset = ''
+    #     res = Response(data=MessageSerializer({"message": _("로그아웃이 완료되었습니다.")}).data)
+    #     # res.set_cookie('access_token', reset)
+    #     # res.delete_cookie('access_token')
+    #     return res
 
 
 class UserDeleteView(BaseAPIView):
