@@ -96,3 +96,7 @@ class CustomTokenRefreshSerializer(serializers.Serializer):
 
         data = {'access_token': str(refresh.access_token)}
         return data
+
+
+class LogoutSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
