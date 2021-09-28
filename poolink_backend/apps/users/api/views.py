@@ -6,9 +6,7 @@ from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.shortcuts import redirect
-from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
-from django.views.decorators.csrf import csrf_exempt
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -94,7 +92,6 @@ def google_callback(request):
 
 class GoogleLogin(SocialLoginView):
 
-    @method_decorator(csrf_exempt)
     def check_email(self):
         access_token = self.request.data['access_token']
         profile_request = requests.get(
@@ -107,14 +104,12 @@ class GoogleLogin(SocialLoginView):
         else:
             return False
 
-    @method_decorator(csrf_exempt)
     def exception(self):
         is_email_user = self.check_email()
         if not is_email_user:
             return JsonResponse({"err_msg": "email already exists."}, status=status.HTTP_400_BAD_REQUEST)
         return super().post
 
-    @method_decorator(csrf_exempt)
     def get_response(self):
         self.exception()
         email = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email']
