@@ -114,7 +114,7 @@ class GoogleLogin(SocialLoginView):
         self.exception()
         email = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email']
         username = self.user.socialaccount_set.values("extra_data")[0].get("extra_data")['email'].split('@')[0]
-        user = User.objects.update_or_create(email=email, username=username)[0]
+        user = User.objects.get_or_create(email=email, username=username)[0]
         response = super().get_response()
 
         prefer = []
