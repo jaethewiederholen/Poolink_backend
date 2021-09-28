@@ -347,16 +347,16 @@ REST_FRAMEWORK = {
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
-CORS_ORIGIN_ALLOW_ALL = False
-CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
-                        'http://localhost:3000',
-                        'https://127.0.0.1:3000',
-                        'https://localhost:3000',
-                        'https://preview.poolink.io',
-                        'https://poolink.io',
-                        ]
-CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:3000', 'http://localhost:3000', 'https://127.0.0.1:3000',
-                         'https://localhost:3000', 'https://preview.poolink.io', 'https://poolink.io',)
+CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = ['http://127.0.0.1:3000',
+#                         'http://localhost:3000',
+#                         'https://127.0.0.1:3000',
+#                         'https://localhost:3000',
+#                         'https://preview.poolink.io',
+#                         'https://poolink.io',
+#                         ]
+# CORS_ORIGIN_WHITELIST = ('http://127.0.0.1:3000', 'http://localhost:3000', 'https://127.0.0.1:3000',
+#                          'https://localhost:3000', 'https://preview.poolink.io', 'https://poolink.io',)
 # CORS_ALLOW_CREDENTIALS = True
 
 # Google Login
