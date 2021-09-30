@@ -186,7 +186,8 @@ class UserSignupView(BaseAPIView):
             username = serializer.validated_data["username"]
             name = serializer.validated_data["name"]
             path = serializer.validated_data["path"]
-            user.update(username=username, name=name)
+            is_agreed_to_terms = serializer.validated_data["is_agreed_to_terms"]
+            user.update(username=username, name=name, is_agreed_to_terms=is_agreed_to_terms)
             Path.objects.create(path=path)
         return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("회원가입 완료")}).data)
 

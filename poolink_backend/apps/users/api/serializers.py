@@ -85,6 +85,7 @@ class SignupSerializer(serializers.Serializer):
         min_length=None,
         trim_whitespace=True
     )
+    is_agreed_to_terms = serializers.BooleanField()
 
 
 class CustomTokenRefreshSerializer(serializers.Serializer):

@@ -23,6 +23,7 @@ class UserAdmin(auth_admin.UserAdmin):
                     "password",
                     "email",
                     "prefer",
+                    "is_agreed_to_terms",
                 )
             },
         ),
