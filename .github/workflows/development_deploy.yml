@@ -35,8 +35,8 @@ jobs:
         with:
           aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: poolink_dev
-          environment_name: poolink-dev-env
+          application_name: poolink
+          environment_name: Poolink-dev
           version_label: ${{ github.sha }}
           version_description: ${{ github.event.head_commit.message }}
           region: ap-northeast-2
