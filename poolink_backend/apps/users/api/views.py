@@ -131,7 +131,7 @@ class GoogleLogin(SocialLoginView):
         result["refresh_token"] = response.data["refresh_token"]
 
         res = Response(status=HTTP_200_OK, data=result)
-        # res['Access-Control-Allow-Origin'] = '*'
+        res['Access-Control-Allow-Origin'] = '*'
         # res.set_cookie('access_token', response.data["access_token"], httponly=True,
         #                domain=".poolink.io")
         # res['access-control-expose-headers'] = 'Set-Cookie'
