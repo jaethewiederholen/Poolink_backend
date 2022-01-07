@@ -1,0 +1,53 @@
+version: '3'
+
+volumes:
+  local_postgres_data: {}
+  local_postgres_data_backups: {}
+
+services:
+
+  postgres:
+    build:
+      context: .
+      dockerfile: ./docker/local/postgres/Dockerfile
+    image: poolink_local_postgres
+    container_name: poolink-local-postgres
+    volumes:
+      - local_postgres_data:/var/lib/postgresql/data:Z
+      - local_postgres_data_backups:/backups:z
+    env_file:
+      - ./.envs/.local/.postgres
+    ports:
+      - "5433:5432"
+
+  redis:
+    image: redis:5.0
+    container_name: poolink-local-redis
+    ports:
+      - "6380:6379"
+
+  django: &django
+    build:
+      context: .
+      dockerfile: ./docker/local/django/Dockerfile
+    image: poolink_local_django
+    container_name: poolink-local-django
+    depends_on:
+      - postgres
+    volumes:
+      - ./:/app:z
+      - /app/venv  # Exclude venv from container filesystem
+    env_file:
+      - ./.envs/.local/.django
+      - ./.envs/.local/.postgres
+    environment:
+      USE_DOCKER: "yes"
+    ports:
+      - "9015:9015"
+    command:
+      - sh
+      - -c
+      - |
+        while true; do
+          sleep 5
+        done

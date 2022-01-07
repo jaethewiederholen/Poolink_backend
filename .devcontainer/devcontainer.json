@@ -1,0 +1,26 @@
+{
+    "name": "poolink-server",
+    "dockerComposeFile": [
+      "../docker-compose.yml",
+    ],
+    "runServices": [
+      "django",
+      "postgres",
+      "redis",
+    ],
+    "service": "django",
+    "postCreateCommand": "sh ./.devcontainer/postCreateCommand.sh",
+    "postAttachCommand": "sh ./.devcontainer/postAttachCommand.sh",
+    "shutdownAction": "stopCompose",
+    "workspaceFolder": "/app",
+    "extensions": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "batisteo.vscode-django",
+      "bungcip.better-toml",
+      "donjayamanne.python-extension-pack",
+      "redhat.vscode-yaml",
+      "magicstack.MagicPython",
+      "wholroyd.jinja",
+    ],
+  }
