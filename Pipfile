@@ -51,6 +51,8 @@ Collectfast = "==2.2.0"
 [dev-packages]
 pytest = "*"
 pre-commit = "*"
+pylint = "*"
+pylint-django = "*"
 
 [requires]
 python_version = "3.8"
