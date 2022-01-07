@@ -132,30 +132,8 @@ class GoogleLogin(SocialLoginView):
 
         res = Response(status=HTTP_200_OK, data=result)
         res['Access-Control-Allow-Origin'] = '*'
-        # res.set_cookie('access_token', response.data["access_token"], httponly=True,
-        #                domain=".poolink.io")
-        # res['access-control-expose-headers'] = 'Set-Cookie'
-        return res
 
-        # result = User.objects.update_or_create(email=email, username=username, )
-        #
-        # if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
-        #     user_refresh = OutstandingToken.objects.filter(user=user)
-        #     if user_refresh.count() > 1:
-        #         last_refresh = user_refresh.order_by('-created_at')[1].token
-        #         blacklist_refresh = RefreshToken(last_refresh)
-        #         try:
-        #             blacklist_refresh.blacklist()
-        #         except AttributeError:
-        #             pass
-        #
-        # refresh_token = response.data["refresh_token"]
-        #
-        # res = Response(status=HTTP_200_OK, data=
-        # [UserLoginSuccessSerializer(result[0]).data,
-        #  {"refresh_token": refresh_token}])
-        # res.set_cookie('access_token', response.data["access_token"], httponly=True)
-        # return res
+        return res
 
     adapter_class = google_view.GoogleOAuth2Adapter
 
