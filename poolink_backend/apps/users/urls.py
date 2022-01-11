@@ -1,11 +1,13 @@
 from django.urls import path
+
 from .api.views import (
+    CustomTokenRefreshView,
+    GoogleLogin,
+    ValidateRefreshTokenView,
     duplicate_check_view,
-    user_signup_view,
     user_delete_view,
     user_logout_view,
-    GoogleLogin,
-    CustomTokenRefreshView,
+    user_signup_view,
 )
 
 app_name = "users"
@@ -16,5 +18,6 @@ urlpatterns = [
     # path("/googlelogin", google_login_view),
     path("googlelogin", GoogleLogin.as_view()),
     path("token/refresh", CustomTokenRefreshView.as_view()),
+    path("token/validate", ValidateRefreshTokenView.as_view()),
     path("check-duplicate", view=duplicate_check_view),
 ]
