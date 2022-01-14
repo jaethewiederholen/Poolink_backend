@@ -21,6 +21,7 @@ from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.category.models import Category
 from poolink_backend.apps.pagination import CustomPagination
 from poolink_backend.apps.permissions import IsWriterOrReadonly
+from poolink_backend.apps.users.models import User
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
@@ -40,6 +41,19 @@ class BoardViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         board = Board.objects.get(id=kwargs['pk'])
         return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
+
+    # 초대 api boards/{board:id}/invite
+    @action(methods=['post'], detail=True, url_path='invite')
+    def invite(self, request, pk):
+        invited = request.data.get('invited')  # 배열
+        board = Board.objects.get(id=pk)
+
+        for i in invited:
+            if User.objects.filter(username=i):  # 유저네임이 존재하면
+                board.invited_users.add(User.objects.get(username=i))  # 초대 유저에 추가
+
+        return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("유저를 초대했습니다.")}).data)
+
     # @action(detail=True, methods=['get', 'post'])
     # def categories(self, request, pk):
     #     if request.method == 'GET':
