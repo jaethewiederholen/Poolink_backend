@@ -10,6 +10,7 @@ from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from poolink_backend.apps.board.api.serializers import (
     BoardCreateSerializer,
     BoardDestroySerializer,
+    BoardInviteSerializer,
     BoardSerializer,
     BoardUpdateSerializer,
     MyBoardSerializer,
@@ -44,11 +45,17 @@ class BoardViewSet(ModelViewSet):
 
     # 초대 api boards/{board:id}/invite
     @action(methods=['post'], detail=True, url_path='invite')
+    @swagger_auto_schema(
+        operation_id=_("Invite Users to Board"),
+        operation_description=_("보드에 유저를 초대합니다."),
+        request_body=BoardInviteSerializer,
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+    )
     def invite(self, request, pk):
-        invited = request.data.get('invited')  # 배열
+        invited_users = request.data.get('invited_users')  # 배열
         board = Board.objects.get(id=pk)
 
-        for i in invited:
+        for i in invited_users:
             if User.objects.filter(username=i):  # 유저네임이 존재하면
                 board.invited_users.add(User.objects.get(username=i))  # 초대 유저에 추가
 

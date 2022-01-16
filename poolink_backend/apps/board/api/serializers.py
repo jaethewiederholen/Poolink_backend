@@ -14,7 +14,7 @@ class BoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap']
+        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users']
 
     def get_board_id(self, instance):
         return instance.id
@@ -28,7 +28,7 @@ class BoardUpdateSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap']
+        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users']
 
     def get_board_id(self, instance):
         return instance.id
@@ -82,7 +82,7 @@ class MyBoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'image', 'user', 'bio', 'links', 'category', 'scrap']
+        fields = ['board_id', 'name', 'image', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users']
 
     def get_board_id(self, instance):
         return instance.id
@@ -116,3 +116,10 @@ class ScrapBoardDestroySerializer(serializers.Serializer):
         child=serializers.IntegerField(),
         write_only=True,
     )
+
+
+class BoardInviteSerializer(ModelSerializer):
+
+    class Meta:
+        model = Board
+        fields = ['invited_users']
