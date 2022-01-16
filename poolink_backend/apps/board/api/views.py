@@ -20,14 +20,14 @@ from poolink_backend.apps.board.api.serializers import (
 from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.category.models import Category
 from poolink_backend.apps.pagination import CustomPagination
-from poolink_backend.apps.permissions import IsWriterOrReadonly
+from poolink_backend.apps.permissions import BoardPermission
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
 class BoardViewSet(ModelViewSet):
-    permission_classes = ([IsWriterOrReadonly])
+    permission_classes = ([BoardPermission])
     serializer_class = BoardSerializer
     queryset = Board.objects.all()
 
@@ -40,34 +40,6 @@ class BoardViewSet(ModelViewSet):
     def retrieve(self, request, *args, **kwargs):
         board = Board.objects.get(id=kwargs['pk'])
         return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
-    # @action(detail=True, methods=['get', 'post'])
-    # def categories(self, request, pk):
-    #     if request.method == 'GET':
-    #         board = get_object_or_404(Board, pk=pk)
-    #         categories = board.category.all()
-    #         serializer = CategorySerializer(categories, many=True)
-    #         return Response(serializer.data)
-    #
-    #     if request.method == 'POST':
-    #         board = get_object_or_404(Board, pk=pk)
-    #         before_category_id = []
-    #         for i in range(len(board.category.through.objects.all())):
-    #             before_category_id.append(board.category.through.objects.all()[i].category.id)
-    #         after_category_id = request.data["category"]
-    #
-    #         delete_category = list(set(before_category_id) - set(after_category_id))
-    #         add_category = list(set(after_category_id) - set(before_category_id))
-    #
-    #         for i in range(0, len(before_category_id)):
-    #             for j in range(0, len(delete_category)):
-    #                 if before_category_id[i] == delete_category[j]:
-    #                     board.category.through.objects.get(category_id=delete_category[i]).delete()
-    #
-    #         for i in add_category:
-    #             board.category.add(i)
-    #
-    #         result = serializers.Serializer("json", board.category.through.objects.all())
-    #         return HttpResponse(result)
 
     @action(detail=False)
     @swagger_auto_schema(

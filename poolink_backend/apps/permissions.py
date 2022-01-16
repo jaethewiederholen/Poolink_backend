@@ -1,3 +1,4 @@
+from django.db.models import Model
 from rest_framework import permissions
 
 from poolink_backend.apps.link.models import Link
@@ -31,4 +32,25 @@ class ProfileUpdatePermission(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         # 자신의 정보만 수정, 삭제 가능
+        return obj.user == request.user
+
+
+class BoardPermission(permissions.BasePermission):
+
+    safe_methods = ("HEAD", "OPTIONS", "GET")
+
+    def init(self) -> None:
+        super().__init__()
+
+    def has_permission(self, request, view) -> bool:
+        if request.method in self.safe_methods:
+            return True
+
+        return request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj: Model) -> bool:
+        """Check if request.user is the owener of the object."""
+        if request.method in self.safe_methods:
+            return True
+
         return obj.user == request.user
