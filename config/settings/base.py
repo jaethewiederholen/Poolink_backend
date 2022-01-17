@@ -345,6 +345,19 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 30,
 }
 
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Token": {
+            "type": "apiKey",
+            "description":
+                """JWT 토큰을 기반으로 한 인증 방식입니다. 'Bearer NTY3ODkwIiwibmFtZSI6I...'와 같이 입력해주세요.<br/>
+                   토큰이 세션보다 우선적으로 사용됩니다.<br/>""",
+            "name": "Authorization",
+            "in": "header",
+        },
+    },
+}
+
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup
 CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ALLOW_ALL_ORIGINS = True

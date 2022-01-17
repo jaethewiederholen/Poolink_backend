@@ -52,5 +52,7 @@ class BoardPermission(permissions.BasePermission):
         """Check if request.user is the owener of the object."""
         if request.method in self.safe_methods:
             return True
-
-        return obj.user == request.user
+        if request.method == "DELETE":
+            return obj.user == request.user
+        else:
+            return obj.user == request.user or request.user in obj.invited_users.all()
