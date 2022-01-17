@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from json.decoder import JSONDecodeError
 
 import requests
@@ -15,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import OutstandingToken, RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from config.settings import base as settings
@@ -24,6 +25,7 @@ from poolink_backend.apps.users.api.serializers import (
     DuplicateCheckSerializer,
     LogoutSerializer,
     SignupSerializer,
+    ValidateRefreshTokenSerializer,
 )
 from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
@@ -121,6 +123,17 @@ class GoogleLogin(SocialLoginView):
         for i in range(len(user.prefer.through.objects.filter(user=user))):
             prefer.append(user.prefer.through.objects.filter(user=user)[i].category.id)
 
+        # 이전 refresh 토큰 폐기
+        if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+            user_refresh = OutstandingToken.objects.filter(user=user)
+            if user_refresh.count() > 1:
+                last_refresh = user_refresh.order_by('-created_at')[1].token
+                blacklist_refresh = RefreshToken(last_refresh)
+                try:
+                    blacklist_refresh.blacklist()
+                except AttributeError:
+                    pass
+
         result = {}
         result["user_id"] = user.id
         result["username"] = user.username
@@ -131,8 +144,10 @@ class GoogleLogin(SocialLoginView):
         result["refresh_token"] = response.data["refresh_token"]
 
         res = Response(status=HTTP_200_OK, data=result)
-        res['Access-Control-Allow-Origin'] = '*'
-
+        # res['Access-Control-Allow-Origin'] = '*'
+        # res.set_cookie('access_token', response.data["access_token"], httponly=True,
+        #                domain=".poolink.io")
+        # res['access-control-expose-headers'] = 'Set-Cookie'
         return res
 
     adapter_class = google_view.GoogleOAuth2Adapter
@@ -140,6 +155,35 @@ class GoogleLogin(SocialLoginView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     serializer_class = CustomTokenRefreshSerializer
+
+
+class ValidateRefreshTokenView(BaseAPIView):
+    allowed_method = "POST"
+    permission_classes = (IsAuthenticated,)
+
+    @swagger_auto_schema(
+        operation_id=_("Validate Refresh Token"),
+        operation_description=_("유효하다면 현재 access 반환 / 유효하지 않다면 오류반환"),
+        request_body=ValidateRefreshTokenSerializer,
+        responses={200: openapi.Response(_("OK"), ValidateRefreshTokenSerializer)},
+    )
+    def post(self, request):
+        refresh_token = request.data.get("refresh_token")
+
+        now = datetime.now(timezone.utc)
+
+        try:
+            expires_at = OutstandingToken.objects.get(token=refresh_token).expires_at
+
+            # 유효하면 (만료되지 않은 토큰)
+            if not RefreshToken(refresh_token).check_blacklist() and now < expires_at:
+                return Response(status=HTTP_200_OK,
+                                data=MessageSerializer({"message": _("valid refresh token")}).data)
+
+        except Exception as e:
+            print(str(e))
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data=MessageSerializer({"message": _("invalid refresh token")}).data)
 
 
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):

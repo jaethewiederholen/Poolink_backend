@@ -99,5 +99,9 @@ class CustomTokenRefreshSerializer(serializers.Serializer):
         return data
 
 
+class ValidateRefreshTokenSerializer(serializers.Serializer):
+    refresh_token = serializers.CharField()
+
+
 class LogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
