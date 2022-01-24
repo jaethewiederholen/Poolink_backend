@@ -1,11 +1,12 @@
 import math
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
 from poolink_backend.apps.board.api.serializers import (
     BoardCreateSerializer,
@@ -56,9 +57,17 @@ class BoardViewSet(ModelViewSet):
         board = Board.objects.get(id=pk)
 
         for i in invited_users:
-            if User.objects.filter(username=i):  # 유저네임이 존재하면
+            if request.user.username == i:
+                return Response(status=HTTP_400_BAD_REQUEST,
+                                data=MessageSerializer({"message": _("보드 소유자는 초대 대상이 아닙니다.")}).data)
+            elif i in board.invited_users.all().values_list("username", flat=True):
+                # 이미 초대된 유저는 다시 초대하지 않고 넘긴다.
+                pass
+            try:
                 board.invited_users.add(User.objects.get(username=i))  # 초대 유저에 추가
-
+            except ObjectDoesNotExist:
+                return Response(status=HTTP_404_NOT_FOUND,
+                                data=MessageSerializer({"message": _("존재하지 않는 유저입니다.")}).data)
         return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("유저를 초대했습니다.")}).data)
 
     @action(detail=False)
