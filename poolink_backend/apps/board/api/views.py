@@ -95,7 +95,7 @@ class MyBoardView(BaseAPIView):
     def get(self, request):
         paginator = CustomPagination()
         user = self.request.user
-        my_board = Board.objects.filter(user_id=user.id)
+        my_board = Board.objects.filter(user_id=user.id, invited_users__isnull=True)
         scrapped_board = self.request.user.scrap.all()
 
         boards = my_board.union(scrapped_board)
@@ -152,6 +152,36 @@ class MyBoardView(BaseAPIView):
 
 
 my_board_view = MyBoardView.as_view()
+
+
+class SharedBoardView(BaseAPIView):
+    allowed_method = ("GET")
+
+    @swagger_auto_schema(
+        operation_id=_("Shared Boards"),
+        operation_description=_("내가 속한 공유 보드를 조회합니다."),
+        responses={200: openapi.Response(_("OK"), MyBoardSerializer,)},
+        tags=[_("공유 보드"), ],
+    )
+    def get(self, request):
+        paginator = CustomPagination()
+        user = self.request.user
+
+        invited_boards = user.invited_boards.all()
+        owned_share_boards = user.boards.filter(invited_users__isnull=False)
+        share_boards = owned_share_boards.union(invited_boards)
+
+        result = paginator.paginate_queryset(share_boards, request)
+
+        data_count = len(share_boards)
+        page_count = math.ceil(data_count / 30)
+
+        return Response(status=HTTP_200_OK, data={"dataCount": data_count,
+                                                  "totalPageCount": page_count,
+                                                  "results": MyBoardSerializer(result, many=True).data})
+
+
+shared_board_view = SharedBoardView.as_view()
 
 
 class ScrapBoardView(BaseAPIView):

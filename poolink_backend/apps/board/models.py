@@ -47,7 +47,7 @@ class Board(Model):
 
     scrap = models.ManyToManyField(User, related_name="scrap", null=True, blank=True)
     category = models.ManyToManyField(Category, related_name="board_category", null=True, blank=True)
-    invited_users = models.ManyToManyField(User, related_name="invited_users", null=True, blank=True)  # 공유 기능 초대된 유저들
+    invited_users = models.ManyToManyField(User, related_name="invited_boards", null=True, blank=True)  # 공유 기능 초대된 유저들
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")
