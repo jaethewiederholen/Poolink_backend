@@ -49,6 +49,10 @@ class BoardViewSet(ModelViewSet):
             return queryset
         return queryset.none()
 
+    def retrieve(self, request, *args, **kwargs):
+        board = Board.objects.get(id=kwargs['pk'])
+        return Response(status=HTTP_200_OK, data=BoardSerializer(board).data)
+
     # 초대 api boards/{board:id}/invite
     @action(methods=['post'], detail=True, url_path='invite')
     @swagger_auto_schema(
