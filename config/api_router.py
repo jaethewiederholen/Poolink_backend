@@ -13,7 +13,7 @@ else:
 
 # base 의 viewset 으로 만들어진 view 들
 router.register("users", UserViewSet)
-router.register("boards", BoardViewSet)
+router.register("boards", BoardViewSet, basename="Board")
 router.register("links", LinkViewSet)
 
 app_name = "api"

@@ -5,6 +5,12 @@ from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
+# from rest_framework.mixins import (
+#     CreateModelMixin,
+#     ListModelMixin,
+#     RetrieveModelMixin,
+#     UpdateModelMixin,
+# )
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
@@ -13,7 +19,6 @@ from poolink_backend.apps.board.api.serializers import (
     BoardDestroySerializer,
     BoardInviteSerializer,
     BoardSerializer,
-    BoardUpdateSerializer,
     MyBoardSerializer,
     PartialBoardSerializer,
     ScrapBoardDestroySerializer,
@@ -26,23 +31,23 @@ from poolink_backend.apps.permissions import BoardPermission
 from poolink_backend.apps.users.models import User
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
+# from poolink_backend.bases.api.views import GenericViewset
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
 class BoardViewSet(ModelViewSet):
     permission_classes = ([BoardPermission])
     serializer_class = BoardSerializer
-    queryset = Board.objects.all()
 
-    def partial_update(self, request, *args, **kwargs):
-        super().partial_update(request)
-        board_id = kwargs['pk']
-        board = Board.objects.get(id=board_id)
-        return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
-
-    def retrieve(self, request, *args, **kwargs):
-        board = Board.objects.get(id=kwargs['pk'])
-        return Response(status=HTTP_200_OK, data=BoardUpdateSerializer(board).data)
+    def get_queryset(self):
+        queryset = Board.objects.all()
+        user = self.request.user
+        if hasattr(self.request, "id"):
+            return Board.objects.all()
+        if user is not None:
+            queryset = queryset.filter(user=user)
+            return queryset
+        return queryset.none()
 
     # 초대 api boards/{board:id}/invite
     @action(methods=['post'], detail=True, url_path='invite')
