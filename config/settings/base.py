@@ -97,6 +97,17 @@ ROOT_URLCONF = "config.urls"
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = "config.wsgi.application"
 
+ASGI_APPLICATION = "config.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
+
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
@@ -125,6 +136,7 @@ THIRD_PARTY_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "opengraph",
+    "channels",
 ]
 
 LOCAL_APPS = [
@@ -132,6 +144,7 @@ LOCAL_APPS = [
     "poolink_backend.apps.board.apps.BoardConfig",
     "poolink_backend.apps.category.apps.CategoryConfig",
     "poolink_backend.apps.link.apps.LinkConfig",
+    "poolink_backend.apps.notification.apps.NotificationConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
