@@ -9,7 +9,7 @@ class LinkSerializer(ModelSerializer):
 
     class Meta:
         model = Link
-        fields = ['link_id', 'board', 'label', 'url', 'show', 'favicon', 'meta_image']
+        fields = ['link_id', 'board', 'label', 'url', 'show', 'favicon', 'meta_image', 'memo']
 
     def get_link_id(self, instance):
         return instance.id

@@ -51,6 +51,12 @@ class Link(Model):
         blank=True,
         max_length=1000,
     )
+    memo = models.TextField(
+        verbose_name=_("링크 메모"),
+        help_text=_("링크에 대한 메모입니다."),
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("링크")
