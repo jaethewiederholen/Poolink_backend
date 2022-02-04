@@ -44,10 +44,33 @@ class Board(Model):
         null=False,
         default=False,
     )
-
-    scrap = models.ManyToManyField(User, related_name="scrap", null=True, blank=True)
-    category = models.ManyToManyField(Category, related_name="board_category", null=True, blank=True)
-    invited_users = models.ManyToManyField(User, related_name="invited_boards", null=True, blank=True)  # 공유 기능 초대된 유저들
+    is_bookmarked = models.BooleanField(
+        verbose_name=_("즐겨찾기"),
+        help_text=_("보드의 즐겨찾기 등록 여부를 나타냅니다."),
+        null=False,
+        default=False,
+    )
+    scrap = models.ManyToManyField(
+        User,
+        related_name="scrap",
+        help_text=_("보드를 스크랩한 유저들입니다."),
+        null=True,
+        blank=True,
+        )
+    category = models.ManyToManyField(
+        Category,
+        related_name="board_category",
+        help_text=_("보드의 카테고리들입니다."),
+        null=True,
+        blank=True,
+        )
+    invited_users = models.ManyToManyField(
+        User,
+        related_name="invited_boards",
+        help_text=_("보드에 초대된 유저들입니다."),
+        null=True,
+        blank=True,
+        )
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")

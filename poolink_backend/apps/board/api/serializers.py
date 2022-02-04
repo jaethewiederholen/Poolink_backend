@@ -14,7 +14,7 @@ class BoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users']
+        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users', 'is_bookmarked']
 
     def get_board_id(self, instance):
         return instance.id
@@ -28,7 +28,7 @@ class BoardUpdateSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users']
+        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users', 'is_bookmarked']
 
     def get_board_id(self, instance):
         return instance.id
@@ -82,7 +82,17 @@ class MyBoardSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'image', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users']
+        fields = [
+            'board_id',
+            'name',
+            'image',
+            'user',
+            'bio',
+            'links',
+            'category',
+            'scrap',
+            'invited_users',
+            'is_bookmarked']
 
     def get_board_id(self, instance):
         return instance.id
