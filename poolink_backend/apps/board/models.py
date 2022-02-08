@@ -71,6 +71,12 @@ class Board(Model):
         null=True,
         blank=True,
         )
+    emoji = models.CharField(
+        verbose_name=_("보드 이모티콘"),
+        help_text=_("보드마다 설정되는 이모티콘입니다."),
+        null=True,
+        max_length=10,
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")
