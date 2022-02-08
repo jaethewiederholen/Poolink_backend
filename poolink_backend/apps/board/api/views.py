@@ -21,7 +21,7 @@ from poolink_backend.apps.permissions import BoardPermission
 from poolink_backend.apps.users.models import User
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
-from poolink_backend.bases.api.viewsets import ModelViewSet
+from poolink_backend.bases.api.views import ModelViewSet
 
 
 class BoardViewSet(ModelViewSet):
@@ -29,11 +29,22 @@ class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
 
     def get_queryset(self):
-        queryset = Board.objects.all().order_by('-is_bookmarked')
+        queryset = Board.objects.all()
         user = self.request.user
         if user is not None:
-            queryset = queryset.filter(user=user)
-            return queryset
+
+            shared = bool(self.request.query_params.get('shared', None))
+            if shared:
+                invited_boards = user.invited_boards.all()
+                owned_share_boards = user.boards.filter(invited_users__isnull=False)
+                boards = owned_share_boards.union(invited_boards)
+
+            else:
+                my_board = Board.objects.filter(user=user, invited_users__isnull=True)
+                scrapped_board = self.request.user.scrap.all()
+                boards = my_board.union(scrapped_board)
+
+            return boards.order_by('-is_bookmarked')
         return queryset.none()
 
     @swagger_auto_schema(
@@ -56,26 +67,6 @@ class BoardViewSet(ModelViewSet):
                 status=HTTP_200_OK,
                 data=data,
             )
-
-    @swagger_auto_schema(
-        operation_id=_("조회"),
-        manual_parameters=[
-            openapi.Parameter('shared', openapi.IN_QUERY, type='boolean')],
-    )
-    def list(self, request):
-        user = self.request.user
-        shared = bool(request.query_params.get('shared', None))
-        if shared:
-            invited_boards = user.invited_boards.all()
-            owned_share_boards = user.boards.filter(invited_users__isnull=False)
-            boards = owned_share_boards.union(invited_boards)
-
-        else:
-            my_board = Board.objects.filter(user=user, invited_users__isnull=True)
-            scrapped_board = self.request.user.scrap.all()
-            boards = my_board.union(scrapped_board)
-
-        return Response(status=HTTP_200_OK, data=BoardSerializer(boards, many=True).data)
 
     @swagger_auto_schema(
         operation_id=_("객체조회")
