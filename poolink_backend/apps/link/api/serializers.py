@@ -6,8 +6,8 @@ from poolink_backend.bases.api.serializers import ModelSerializer
 
 class FilteredLinkSerializer(serializers.ListSerializer):
 
-    def get_last_two(self, data):
-        data = data.filter(board=self.context['board'].board).order_by('-id')[:2]
+    def to_representation(self, data):
+        data = data.order_by('-id')[:2]
         return super(FilteredLinkSerializer, self).to_representation(data)
 
 
