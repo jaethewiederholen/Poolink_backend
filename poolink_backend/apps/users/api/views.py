@@ -38,38 +38,6 @@ BASE_URL = settings.GOOGLE_BASE_URL
 GOOGLE_CALLBACK_URI = BASE_URL + 'google/callback/'
 
 
-# @swagger_auto_schema(
-#     method="POST",
-#     operation_id="users-login-google",
-#     operation_description=_(""),
-#     request_body=GoogleLoginSerializer,
-#     responses={
-#         HTTP_200_OK: UserLoginSuccessSerializer,
-#     },
-#     tags=[_("로그인")],
-# )
-# @api_view(("POST",))
-# @authentication_classes([])
-# @permission_classes([])
-# def google_login_view(request):
-#     serializer = GoogleLoginSerializer(data=request.data)
-#     if serializer.is_valid(raise_exception=True):
-#         access_token = serializer.validated_data["access_token"]
-#         email_req = requests.get(
-#             f"https://www.googleapis.com/oauth2/v1/tokeninfo?access_token={access_token}")
-#         email_req_status = email_req.status_code
-#
-#         if email_req_status != 200:
-#             return Response({'err_msg': 'failed to get email'}, status=status.HTTP_400_BAD_REQUEST)
-#         email_req_json = email_req.json()
-#         email = email_req_json.get('email')
-#
-#         user, created = User.objects.update_or_create(
-#             email=email,
-#         )
-#         return Response(status=HTTP_200_OK, data=UserLoginSuccessSerializer(user).data)
-
-
 def google_login(request):
     scope = "https://www.googleapis.com/auth/userinfo.email"
     client_id = settings.SOCIAL_AUTH_GOOGLE_CLIENT_ID
@@ -98,6 +66,7 @@ class GoogleLogin(SocialLoginView):
         access_token = self.request.data['access_token']
         profile_request = requests.get(
             "https://www.googleapis.com/oauth2/v2/userinfo", headers={"Authorization": f"Bearer {access_token}"})
+        print("***************************************check profile*************************************")
         profile_json = profile_request.json()
         email = profile_json.get('email')
         user = User.objects.filter(email=email)
@@ -124,15 +93,15 @@ class GoogleLogin(SocialLoginView):
             prefer.append(user.prefer.through.objects.filter(user=user)[i].category.id)
 
         # 이전 refresh 토큰 폐기
-        if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
-            user_refresh = OutstandingToken.objects.filter(user=user)
-            if user_refresh.count() > 1:
-                last_refresh = user_refresh.order_by('-created_at')[1].token
-                blacklist_refresh = RefreshToken(last_refresh)
-                try:
-                    blacklist_refresh.blacklist()
-                except AttributeError:
-                    pass
+        # if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+        #     user_refresh = OutstandingToken.objects.filter(user=user)
+        #     if user_refresh.count() > 1:
+        #         last_refresh = user_refresh.order_by('-created_at')[1].token
+        #         blacklist_refresh = RefreshToken(last_refresh)
+        #         try:
+        #             blacklist_refresh.blacklist()
+        #         except AttributeError:
+        #             pass
 
         result = {}
         result["user_id"] = user.id
