@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter, SimpleRouter
 
 from poolink_backend.apps.board.api.views import BoardViewSet
 from poolink_backend.apps.link.api.views import LinkViewSet
+from poolink_backend.apps.notification.api.views import NotificationViewSet
 from poolink_backend.apps.users.api.views import UserViewSet
 
 if settings.DEBUG:
@@ -13,8 +14,10 @@ else:
 
 # base 의 viewset 으로 만들어진 view 들
 router.register("users", UserViewSet)
-router.register("boards", BoardViewSet)
+router.register("boards", BoardViewSet, basename="Board")
 router.register("links", LinkViewSet)
+router.register("notification", NotificationViewSet)
+
 
 app_name = "api"
 urlpatterns = [

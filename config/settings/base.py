@@ -97,6 +97,17 @@ ROOT_URLCONF = "config.urls"
 # https://docs.djangoproject.com/en/dev/ref/settings/#wsgi-application
 WSGI_APPLICATION = "config.wsgi.application"
 
+ASGI_APPLICATION = "config.asgi.application"
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
+
 # APPS
 # ------------------------------------------------------------------------------
 DJANGO_APPS = [
@@ -125,6 +136,7 @@ THIRD_PARTY_APPS = [
     "dj_rest_auth",
     "dj_rest_auth.registration",
     "opengraph",
+    "channels",
 ]
 
 LOCAL_APPS = [
@@ -132,6 +144,7 @@ LOCAL_APPS = [
     "poolink_backend.apps.board.apps.BoardConfig",
     "poolink_backend.apps.category.apps.CategoryConfig",
     "poolink_backend.apps.link.apps.LinkConfig",
+    "poolink_backend.apps.notification.apps.NotificationConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -343,6 +356,19 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     'DEFAULT_PAGINATION_CLASS': 'poolink_backend.apps.pagination.CustomPagination',
     'PAGE_SIZE': 30,
+}
+
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Token": {
+            "type": "apiKey",
+            "description":
+                """JWT 토큰을 기반으로 한 인증 방식입니다. 'Bearer NTY3ODkwIiwibmFtZSI6I...'와 같이 입력해주세요.<br/>
+                   토큰이 세션보다 우선적으로 사용됩니다.<br/>""",
+            "name": "Authorization",
+            "in": "header",
+        },
+    },
 }
 
 # django-cors-headers - https://github.com/adamchainz/django-cors-headers#setup

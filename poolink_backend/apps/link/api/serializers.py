@@ -4,12 +4,27 @@ from poolink_backend.apps.link.models import Link
 from poolink_backend.bases.api.serializers import ModelSerializer
 
 
+class FilteredLinkSerializer(serializers.ListSerializer):
+
+    def get_last_two(self, data):
+        data = data.filter(board=self.context['board'].board).order_by('-id')[:2]
+        return super(FilteredLinkSerializer, self).to_representation(data)
+
+
+class LinkInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        list_serializer_class = FilteredLinkSerializer
+        model = Link
+        fields = ['board', 'label', 'url', 'favicon', 'meta_image']
+
+
 class LinkSerializer(ModelSerializer):
     link_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Link
-        fields = ['link_id', 'board', 'label', 'url', 'show', 'favicon', 'meta_image']
+        fields = ['link_id', 'board', 'label', 'url', 'show', 'favicon', 'meta_image', 'memo']
 
     def get_link_id(self, instance):
         return instance.id

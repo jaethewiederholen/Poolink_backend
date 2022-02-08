@@ -34,6 +34,7 @@ services:
     container_name: poolink-local-django
     depends_on:
       - postgres
+      - redis
     volumes:
       - ./:/app:z
       - /app/venv  # Exclude venv from container filesystem
