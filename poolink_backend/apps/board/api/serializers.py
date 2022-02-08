@@ -3,18 +3,30 @@ from rest_framework import serializers
 from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.category.api.serializers import CategorySerializer
 from poolink_backend.apps.category.models import Category
-from poolink_backend.apps.link.api.serializers import LinkSerializer
+from poolink_backend.apps.link.api.serializers import LinkInfoSerializer, LinkSerializer
 from poolink_backend.bases.api.serializers import ModelSerializer
 
 
 # Viewset에 사용되는 serializer
 class BoardSerializer(ModelSerializer):
-    links = LinkSerializer(many=True, read_only=True)
+    links = LinkInfoSerializer(many=True, read_only=True)
     board_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
-        fields = ['board_id', 'name', 'user', 'bio', 'links', 'category', 'scrap', 'invited_users', 'is_bookmarked']
+        fields = [
+            'board_id',
+            'name',
+            'user',
+            'bio',
+            'links',
+            'category',
+            'scrap',
+            'invited_users',
+            'is_bookmarked',
+            'created',
+            'modified'
+            ]
 
     def get_board_id(self, instance):
         return instance.id

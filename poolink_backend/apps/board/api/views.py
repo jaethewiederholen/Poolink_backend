@@ -1,16 +1,9 @@
-import math
-
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
-# from rest_framework.mixins import (
-#     CreateModelMixin,
-#     ListModelMixin,
-#     RetrieveModelMixin,
-#     UpdateModelMixin,
-# )
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.response import Response
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 
@@ -19,19 +12,15 @@ from poolink_backend.apps.board.api.serializers import (
     BoardDestroySerializer,
     BoardInviteSerializer,
     BoardSerializer,
-    MyBoardSerializer,
-    PartialBoardSerializer,
     ScrapBoardDestroySerializer,
     ScrapBoardSerializer,
 )
 from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.category.models import Category
-from poolink_backend.apps.pagination import CustomPagination
 from poolink_backend.apps.permissions import BoardPermission
 from poolink_backend.apps.users.models import User
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
-# from poolink_backend.bases.api.views import GenericViewset
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
 
@@ -40,23 +29,90 @@ class BoardViewSet(ModelViewSet):
     serializer_class = BoardSerializer
 
     def get_queryset(self):
-        queryset = Board.objects.all()
+        queryset = Board.objects.all().order_by('-is_bookmarked')
         user = self.request.user
-        if hasattr(self.request, "id"):
-            return Board.objects.all()
         if user is not None:
             queryset = queryset.filter(user=user)
             return queryset
         return queryset.none()
 
+    @swagger_auto_schema(
+        operation_id=_("생성"),
+        operation_description=_("보드를 생성합니다."),
+        request_body=BoardCreateSerializer,
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+    )
+    def create(self, request):
+        if not request.data['user'] == request.user.id:
+            raise PermissionDenied
+
+        serializer = BoardCreateSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            new_board = serializer.save()
+            new_board.update(image=Category.objects.get(id=serializer.validated_data["category"][0]).image)
+            data = {"id": new_board.id}
+            data.update(MessageSerializer({"message": _("보드를 생성했습니다.")}).data)
+            return Response(
+                status=HTTP_200_OK,
+                data=data,
+            )
+
+    @swagger_auto_schema(
+        operation_id=_("조회"),
+        manual_parameters=[
+            openapi.Parameter('shared', openapi.IN_QUERY, type='boolean')],
+    )
+    def list(self, request):
+        user = self.request.user
+        shared = bool(request.query_params.get('shared', None))
+        if shared:
+            invited_boards = user.invited_boards.all()
+            owned_share_boards = user.boards.filter(invited_users__isnull=False)
+            boards = owned_share_boards.union(invited_boards)
+
+        else:
+            my_board = Board.objects.filter(user=user, invited_users__isnull=True)
+            scrapped_board = self.request.user.scrap.all()
+            boards = my_board.union(scrapped_board)
+
+        return Response(status=HTTP_200_OK, data=BoardSerializer(boards, many=True).data)
+
+    @swagger_auto_schema(
+        operation_id=_("객체조회")
+    )
     def retrieve(self, request, *args, **kwargs):
-        board = Board.objects.get(id=kwargs['pk'])
+        try:
+            board = Board.objects.get(id=kwargs['pk'])
+        except Board.DoesNotExist:
+            raise NotFound
         return Response(status=HTTP_200_OK, data=BoardSerializer(board).data)
+
+    @action(methods=['delete'], detail=False, url_path='bulk-delete')
+    @swagger_auto_schema(
+        operation_id=_("다중삭제"),
+        operation_description=_("보드를 삭제합니다."),
+        request_body=BoardDestroySerializer,
+        responses={200: openapi.Response(_("OK"), MessageSerializer),
+                   400: openapi.Response(_("Bad Request"), MessageSerializer)},
+    )
+    def delete(self, request):
+        serializer = BoardDestroySerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            query = Board.objects.filter(
+                user=request.user,
+                id__in=serializer.validated_data["boards"]
+            )
+            if not query:
+                return Response(status=HTTP_400_BAD_REQUEST,
+                                data=MessageSerializer({"message": _("보드삭제 권한이 없거나 존재하지 않는 보드입니다.")}).data)
+            else:
+                query.delete()
+                return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
 
     # 초대 api boards/{board:id}/invite
     @action(methods=['post'], detail=True, url_path='invite')
     @swagger_auto_schema(
-        operation_id=_("Invite Users to Board"),
+        operation_id=_("유저 초대"),
         operation_description=_("보드에 유저를 초대합니다."),
         request_body=BoardInviteSerializer,
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
@@ -78,128 +134,6 @@ class BoardViewSet(ModelViewSet):
                 return Response(status=HTTP_404_NOT_FOUND,
                                 data=MessageSerializer({"message": _("존재하지 않는 유저입니다.")}).data)
         return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("유저를 초대했습니다.")}).data)
-
-    @action(detail=False)
-    @swagger_auto_schema(
-        operation_id=_("Get My Board Partial Info"),
-        operation_description=_("사이드바에 보여질 보드들 입니다."),
-        responses={200: openapi.Response(_("OK"), PartialBoardSerializer, )},
-        tags=[_("내 보드"), ],
-    )
-    def partial(self, request):
-        paginator = CustomPagination()
-        user = self.request.user
-        boards = Board.objects.filter(user_id=user.id)
-        result = paginator.paginate_queryset(boards, request)
-        data_count = len(boards)
-        page_count = math.ceil(data_count / 30)
-
-        return Response(status=HTTP_200_OK, data={"dataCount": data_count,
-                                                  "totalPageCount": page_count,
-                                                  "results": PartialBoardSerializer(result, many=True).data})
-
-
-class MyBoardView(BaseAPIView):
-    allowed_method = ("GET", "POST", "DELETE")
-
-    @swagger_auto_schema(
-        operation_id=_("Get My Board"),
-        operation_description=_("저장 페이지에 보여질 보드들 입니다."),
-        manual_parameters=[
-            openapi.Parameter('page', openapi.IN_QUERY, type='integer')],
-        responses={200: openapi.Response(_("OK"), MyBoardSerializer, )},
-        tags=[_("내 보드"), ],
-    )
-    def get(self, request):
-        paginator = CustomPagination()
-        user = self.request.user
-        my_board = Board.objects.filter(user_id=user.id, invited_users__isnull=True)
-        scrapped_board = self.request.user.scrap.all()
-
-        boards = my_board.union(scrapped_board)
-        result = paginator.paginate_queryset(boards, request)
-
-        data_count = len(boards)
-        page_count = math.ceil(data_count / 30)
-
-        return Response(status=HTTP_200_OK, data={"dataCount": data_count,
-                                                  "totalPageCount": page_count,
-                                                  "results": MyBoardSerializer(result, many=True).data})
-
-    @swagger_auto_schema(
-        operation_id=_("Create My Board"),
-        operation_description=_("보드를 추가합니다."),
-        request_body=BoardCreateSerializer,
-        responses={200: openapi.Response(_("OK"), MessageSerializer)},
-        tags=[_("내 보드"), ],
-    )
-    def post(self, request):
-        request.data['user'] = request.user.id
-        serializer = BoardCreateSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            new_board = serializer.save()
-            new_board.update(image=Category.objects.get(id=serializer.validated_data["category"][0]).image)
-            data = {"id": new_board.id}
-            data.update(MessageSerializer({"message": _("보드를 생성했습니다.")}).data)
-            return Response(
-                status=HTTP_200_OK,
-                data=data,
-            )
-
-    @swagger_auto_schema(
-        operation_id=_("Delete My Board"),
-        operation_description=_("보드를 삭제합니다."),
-        request_body=BoardDestroySerializer,
-        responses={200: openapi.Response(_("OK"), MessageSerializer),
-                   400: openapi.Response(_("Bad Request"), MessageSerializer)},
-        tags=[_("내 보드"), ]
-    )
-    def delete(self, request):
-        serializer = BoardDestroySerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            query = Board.objects.filter(
-                user=request.user,
-                id__in=serializer.validated_data["boards"]
-            )
-            if not query:
-                return Response(status=HTTP_400_BAD_REQUEST,
-                                data=MessageSerializer({"message": _("보드삭제 권한이 없거나 존재하지 않는 보드입니다.")}).data)
-            else:
-                query.delete()
-                return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("보드를 삭제했습니다.")}).data)
-
-
-my_board_view = MyBoardView.as_view()
-
-
-class SharedBoardView(BaseAPIView):
-    allowed_method = ("GET")
-
-    @swagger_auto_schema(
-        operation_id=_("Shared Boards"),
-        operation_description=_("내가 속한 공유 보드를 조회합니다."),
-        responses={200: openapi.Response(_("OK"), MyBoardSerializer,)},
-        tags=[_("공유 보드"), ],
-    )
-    def get(self, request):
-        paginator = CustomPagination()
-        user = self.request.user
-
-        invited_boards = user.invited_boards.all()
-        owned_share_boards = user.boards.filter(invited_users__isnull=False)
-        share_boards = owned_share_boards.union(invited_boards)
-
-        result = paginator.paginate_queryset(share_boards, request)
-
-        data_count = len(share_boards)
-        page_count = math.ceil(data_count / 30)
-
-        return Response(status=HTTP_200_OK, data={"dataCount": data_count,
-                                                  "totalPageCount": page_count,
-                                                  "results": MyBoardSerializer(result, many=True).data})
-
-
-shared_board_view = SharedBoardView.as_view()
 
 
 class ScrapBoardView(BaseAPIView):
