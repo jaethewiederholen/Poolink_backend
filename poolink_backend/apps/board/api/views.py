@@ -14,6 +14,7 @@ from poolink_backend.apps.board.api.serializers import (
     BoardSerializer,
     ScrapBoardDestroySerializer,
     ScrapBoardSerializer,
+    SingleBoardSerializer,
 )
 from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.category.models import Category
@@ -76,7 +77,7 @@ class BoardViewSet(ModelViewSet):
             board = Board.objects.get(id=kwargs['pk'])
         except Board.DoesNotExist:
             raise NotFound
-        return Response(status=HTTP_200_OK, data=BoardSerializer(board).data)
+        return Response(status=HTTP_200_OK, data=SingleBoardSerializer(board, context={'request': request}).data)
 
     @action(methods=['delete'], detail=False, url_path='bulk-delete')
     @swagger_auto_schema(
