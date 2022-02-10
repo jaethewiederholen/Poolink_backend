@@ -31,30 +31,64 @@ class TokenSerializer(ModelSerializer):
         read_only_fields = ("key",)
 
 
-class UserLoginSuccessSerializer(UserSerializer):
-    # token = serializers.SerializerMethodField()
-    user_id = serializers.SerializerMethodField()
+# class UserLoginSuccessSerializer(UserSerializer):
+#     # token = serializers.SerializerMethodField()
+#     user_id = serializers.SerializerMethodField()
 
-    class Meta:
-        model = User
-        fields = (
-            "user_id",
-            "username",
-            "name",
-            "email",
-            "prefer",
-            "is_agreed_to_terms",
-        )
+#     class Meta:
+#         model = User
+#         fields = (
+#             "user_id",
+#             "username",
+#             "name",
+#             "email",
+#             "prefer",
+#             "is_agreed_to_terms",
+#         )
 
-    # def get_token(self, obj):
-    #     return obj.access_token
+#     # def get_token(self, obj):
+#     #     return obj.access_token
 
-    def get_user_id(self, instance):
-        return instance.id
+#     def get_user_id(self, instance):
+#         return instance.id
 
-    # def get_refresh_token(self, instance):
-    #     refresh_token =
-    #     return refresh_token
+#     # def get_refresh_token(self, instance):
+#     #     refresh_token =
+#     #     return refresh_token
+
+
+class UserLoginSuccessSerializer(serializers.Serializer):
+    user_id = serializers.IntegerField()
+    username = serializers.CharField(
+        max_length=70,
+        min_length=1,
+        trim_whitespace=True
+    )
+    name = serializers.CharField(
+        max_length=70,
+        min_length=1,
+        trim_whitespace=True
+    )
+    email = serializers.CharField(
+        max_length=None,
+        min_length=None,
+        trim_whitespace=True
+    )
+    prefer = serializers.CharField(
+        max_length=None,
+        min_length=None,
+        trim_whitespace=True
+    )
+    access_token = serializers.CharField(
+        max_length=None,
+        min_length=None,
+        trim_whitespace=True
+    )
+    refresh_token = serializers.CharField(
+        max_length=None,
+        min_length=None,
+        trim_whitespace=True
+    )
 
 
 class DuplicateCheckSerializer(ModelSerializer):

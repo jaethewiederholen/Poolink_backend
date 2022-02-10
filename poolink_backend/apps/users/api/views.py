@@ -7,6 +7,7 @@ from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import logout
 from django.http import JsonResponse
 from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
@@ -31,7 +32,11 @@ from poolink_backend.apps.users.models import Path, User
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 
-from .serializers import UserSerializer
+from .serializers import (
+    GoogleLoginSerializer,
+    UserLoginSuccessSerializer,
+    UserSerializer,
+)
 
 state = settings.STATE
 BASE_URL = settings.GOOGLE_BASE_URL
@@ -92,6 +97,13 @@ def google_callback(request):
     return JsonResponse({"access_token": access_token}, json_dumps_params={'ensure_ascii': False})
 
 
+@method_decorator(name='post', decorator=swagger_auto_schema(
+    operation_id="users-login-google",
+    operation_description=_(""),
+    request_body=GoogleLoginSerializer,
+    responses={
+        HTTP_200_OK: UserLoginSuccessSerializer,
+    }))
 class GoogleLogin(SocialLoginView):
 
     def check_email(self):
@@ -124,15 +136,15 @@ class GoogleLogin(SocialLoginView):
             prefer.append(user.prefer.through.objects.filter(user=user)[i].category.id)
 
         # 이전 refresh 토큰 폐기
-        if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
-            user_refresh = OutstandingToken.objects.filter(user=user)
-            if user_refresh.count() > 1:
-                last_refresh = user_refresh.order_by('-created_at')[1].token
-                blacklist_refresh = RefreshToken(last_refresh)
-                try:
-                    blacklist_refresh.blacklist()
-                except AttributeError:
-                    pass
+        # if settings.SIMPLE_JWT['ROTATE_REFRESH_TOKENS']:
+        #     user_refresh = OutstandingToken.objects.filter(user=user)
+        #     if user_refresh.count() > 1:
+        #         last_refresh = user_refresh.order_by('-created_at')[1].token
+        #         blacklist_refresh = RefreshToken(last_refresh)
+        #         try:
+        #             blacklist_refresh.blacklist()
+        #         except AttributeError:
+        #             pass
 
         result = {}
         result["user_id"] = user.id

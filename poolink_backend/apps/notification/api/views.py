@@ -14,7 +14,7 @@ from .serializers import UserNotificationSerializer
 
 
 class NotificationViewSet(ModelViewSet):
-    http_method_names = ['get', 'post', 'put']
+    http_method_names = ['get', 'post']
     serializer_class = UserNotificationSerializer
     permission_classes = (IsAuthenticated, )
     queryset = Notification.objects.all()
