@@ -30,6 +30,7 @@ class BoardSerializer(ModelSerializer):
             'scrap',
             'invited_users',
             'is_bookmarked',
+            'searchable',
             'created',
             'modified'
             ]
@@ -64,6 +65,7 @@ class SingleBoardSerializer(ModelSerializer):
             'scrap',
             'invited_users',
             'is_bookmarked',
+            'searchable',
             'created',
             'modified'
             ]
@@ -81,10 +83,8 @@ class SingleBoardSerializer(ModelSerializer):
     def get_links(self, instance):
         user = None
         request = self.context.get("request")
-        print(request)
         if request and hasattr(request, "user"):
             user = request.user
-        print(user)
         if user == instance.user or user in instance.invited_users.all():
             return LinkSerializer(instance.links.all(), many=True).data
 

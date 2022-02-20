@@ -13,10 +13,10 @@ else:
     router = SimpleRouter()
 
 # base 의 viewset 으로 만들어진 view 들
-router.register("users", UserViewSet)
+router.register("users", UserViewSet, basename="User")
 router.register("boards", BoardViewSet, basename="Board")
-router.register("links", LinkViewSet)
-router.register("notification", NotificationViewSet)
+router.register("links", LinkViewSet, basename="Link")
+router.register("notification", NotificationViewSet, basename="Notification")
 
 
 app_name = "api"

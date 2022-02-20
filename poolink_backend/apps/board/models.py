@@ -77,6 +77,11 @@ class Board(Model):
         null=True,
         max_length=10,
     )
+    searchable = models.BooleanField(
+        verbose_name=_("탐색 가능 여부"),
+        help_text=_("보드의 탐색페이지 공개 여부입니다."),
+        default=True,
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("보드")
