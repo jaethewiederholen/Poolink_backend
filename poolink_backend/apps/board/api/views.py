@@ -20,6 +20,7 @@ from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.category.models import Category
 from poolink_backend.apps.permissions import BoardPermission
 from poolink_backend.apps.users.models import User
+from poolink_backend.bases.api.paginations import SmallResultsSetPagination
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.views import ModelViewSet
@@ -40,6 +41,7 @@ class BoardViewSet(ModelViewSet):
     def list(self, request):
         user = request.user
         shared = bool(request.query_params.get('shared', None))
+        paginator = SmallResultsSetPagination()
         if shared:
             invited_boards = user.invited_boards.all()
             owned_share_boards = user.boards.filter(invited_users__isnull=False)
@@ -49,8 +51,9 @@ class BoardViewSet(ModelViewSet):
             my_board = Board.objects.filter(user=user, invited_users__isnull=True)
             scrapped_board = self.request.user.scrap.all()
             boards = my_board.union(scrapped_board).order_by('-is_bookmarked')
-
-        return Response(status=HTTP_200_OK, data=BoardSerializer(boards, many=True).data)
+        page = paginator.paginate_queryset(boards, request)
+        serializer = BoardSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
         operation_id=_("생성"),

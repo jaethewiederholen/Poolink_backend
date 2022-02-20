@@ -24,7 +24,6 @@ from poolink_backend.bases.api.views import ModelViewSet
 class LinkViewSet(ModelViewSet):
     permission_classes = ([LinkPermission])
     serializer_class = LinkSerializer
-    pagination_class = StandardResultsSetPagination
     queryset = Link.objects.all()
 
     @swagger_auto_schema(
@@ -34,12 +33,15 @@ class LinkViewSet(ModelViewSet):
     )
     def list(self, request):
         user = self.request.user
+        paginator = StandardResultsSetPagination()
         filtered_board = Board.objects.filter(
             category__in=user.prefer.through.objects.filter(user_id=user.id).values('category_id'),
             searchable=True).exclude(user=user)
 
         links = Link.objects.filter(board__in=filtered_board, show=True)
-        return Response(status=HTTP_200_OK, data=LinkSerializer(links, many=True).data)
+        page = paginator.paginate_queryset(links, request)
+        serializer = LinkSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
         operation_id=_("Create Link"),
