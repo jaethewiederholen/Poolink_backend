@@ -12,11 +12,15 @@ class CurtLinkSerializer(serializers.ListSerializer):
 
 
 class LinkInfoSerializer(serializers.ModelSerializer):
+    link_id = serializers.SerializerMethodField()
 
     class Meta:
         list_serializer_class = CurtLinkSerializer
         model = Link
-        fields = ['board', 'label', 'url', 'favicon', 'meta_image']
+        fields = ['link_id', 'board', 'label', 'url', 'favicon', 'meta_image']
+
+    def get_link_id(self, instance):
+        return instance.id
 
 
 class FilteredLinkSerializer(serializers.ListSerializer):
