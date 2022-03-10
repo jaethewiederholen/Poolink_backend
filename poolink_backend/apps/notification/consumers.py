@@ -31,14 +31,14 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         board = text_data_json['board']
         notification = text_data_json['notification']
 
-        created_at = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+09:00')
+        created = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+09:00')
 
         event = {
             'type': 'send_notification',
             'sender': sender,
             'receiver': receiver,
             'board': board,
-            'created_at': created_at,
+            'created': created,
             'notification': notification
         }
 
