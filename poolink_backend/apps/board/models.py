@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from poolink_backend.apps.category.models import Category
+from poolink_backend.apps.hashtag.models import Hashtag
 from poolink_backend.apps.users.models import User
 from poolink_backend.bases.models import Model
 
@@ -81,6 +82,12 @@ class Board(Model):
         verbose_name=_("탐색 가능 여부"),
         help_text=_("보드의 탐색페이지 공개 여부입니다."),
         default=True,
+    )
+    tags = models.ManyToManyField(
+        Hashtag,
+        related_name="tagged_boards",
+        help_text=_("보드의 해시태그입니다."),
+        null=True,
     )
 
     class Meta:
