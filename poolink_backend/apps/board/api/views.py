@@ -17,7 +17,6 @@ from poolink_backend.apps.board.api.serializers import (
     SingleBoardSerializer,
 )
 from poolink_backend.apps.board.models import Board
-from poolink_backend.apps.category.models import Category
 from poolink_backend.apps.permissions import BoardPermission
 from poolink_backend.apps.users.models import User
 from poolink_backend.bases.api.paginations import SmallResultsSetPagination
@@ -68,7 +67,6 @@ class BoardViewSet(ModelViewSet):
         serializer = BoardCreateSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             new_board = serializer.save()
-            new_board.update(image=Category.objects.get(id=serializer.validated_data["category"][0]).image)
             data = {"id": new_board.id}
             data.update(MessageSerializer({"message": _("보드를 생성했습니다.")}).data)
             return Response(
