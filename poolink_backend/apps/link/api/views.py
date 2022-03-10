@@ -34,9 +34,12 @@ class LinkViewSet(ModelViewSet):
     def list(self, request):
         user = self.request.user
         paginator = StandardResultsSetPagination()
-        filtered_board = Board.objects.filter(
-            category__in=user.prefer.through.objects.filter(user_id=user.id).values('category_id'),
-            searchable=True).exclude(user=user)
+        if not user.preferred_tags.all():
+            filtered_board = Board.objects.filter(searchable=True).exclude(user=user)
+        else:
+            filtered_board = Board.objects.filter(
+                tags__in=user.preferred_tags.through.objects.filter(user_id=user.id).values('hashtag_id'),
+                searchable=True).exclude(user=user)
 
         links = Link.objects.filter(board__in=filtered_board, show=True)
         page = paginator.paginate_queryset(links, request)
