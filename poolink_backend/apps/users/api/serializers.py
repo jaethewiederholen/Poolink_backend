@@ -3,6 +3,7 @@ from rest_framework import serializers
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from poolink_backend.apps.hashtag.api.serializers import HashtagSerializer
 from poolink_backend.apps.users.models import Path
 from poolink_backend.bases.api.serializers import ModelSerializer
 
@@ -11,10 +12,11 @@ User = get_user_model()
 
 class UserSerializer(ModelSerializer):
     user_id = serializers.SerializerMethodField()
+    preferred_tags = HashtagSerializer(many=True)
 
     class Meta:
         model = User
-        fields = ["user_id", "username", "name", "email", "prefer", "is_agreed_to_terms", ]
+        fields = ["user_id", "username", "name", "email", "preferred_tags", "is_agreed_to_terms", ]
 
     def get_user_id(self, instance):
         return instance.id
