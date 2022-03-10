@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -25,10 +26,19 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     # Receive message from websocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
+        receiver = text_data_json['receiver']
+        sender = text_data_json['sender']
+        board = text_data_json['board']
         notification = text_data_json['notification']
+
+        created_at = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+09:00')
 
         event = {
             'type': 'send_notification',
+            'sender': sender,
+            'receiver': receiver,
+            'board': board,
+            'created_at': created_at,
             'notification': notification
         }
 
@@ -38,13 +48,11 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     # Receive message from group
     async def send_notification(self, event):
 
-        # view 에 작성한 코드와 동일 -- 동작 방식 다시 확인해보자
-        notification_obj = json.loads(json.dumps(event['notification']))
-
-        receiver = await sync_to_async(User.objects.get, thread_sensitive=True)(id=notification_obj['receiver'])
-        sender = await sync_to_async(User.objects.get, thread_sensitive=True)(id=notification_obj['sender'])
-        board = await sync_to_async(Board.objects.get, thread_sensitive=True)(id=notification_obj['board'])
-        notification = f"{sender}가 {board.name}에 초대했습니다."
+        # 테이블에 데이터 추가
+        receiver = await sync_to_async(User.objects.get, thread_sensitive=True)(id=event['receiver'])
+        sender = await sync_to_async(User.objects.get, thread_sensitive=True)(id=event['sender'])
+        board = await sync_to_async(Board.objects.get, thread_sensitive=True)(id=event['board'])
+        notification = f"{sender} 님이 {board.name} 보드에 회원님을 초대했습니다."
 
         await sync_to_async(Notification.objects.create, thread_sensitive=True)(receiver=receiver,
                                                                                 sender=sender,
@@ -53,10 +61,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            "notification": {
-                "receiver": notification_obj['receiver'],
-                "sender": notification_obj['sender'],
-                "board": notification_obj['board'],
-                "notification": notification_obj['notification']
-            }
+            "sender": event['sender'],
+            "receiver": event['receiver'],
+            "board": event['board'],
+            "created_at": event['created_at'],
+            "notification": event['notification']
         }))

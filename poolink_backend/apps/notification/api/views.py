@@ -1,8 +1,7 @@
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
+from rest_framework.status import HTTP_200_OK
 
 from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.notification.models import Notification
@@ -19,16 +18,16 @@ class NotificationViewSet(ModelViewSet):
     permission_classes = (IsAuthenticated, )
     queryset = Notification.objects.all()
 
-    def get_queryset(self, *args, **kwargs):
-        try:
-            receiver = self.lookup_url_kwarg['receiver']
-            if id:
-                user_obj = User.objects.get(id=receiver)
-                if user_obj:
-                    return Notification.objects.filter(user=user_obj)
-        except ObjectDoesNotExist:
-            return Response(status=HTTP_404_NOT_FOUND,
-                            data=MessageSerializer({"message": _("존재하지 않는 유저입니다.")}).data)
+    # def get_queryset(self, *args, **kwargs):
+    #     try:
+    #         receiver = self.lookup_url_kwarg['receiver']
+    #         if receiver:
+    #             user_obj = User.objects.get(id=receiver)
+    #             if user_obj:
+    #                 return Notification.objects.filter(user=user_obj)
+    #     except ObjectDoesNotExist:
+    #         return Response(status=HTTP_404_NOT_FOUND,
+    #                         data=MessageSerializer({"message": _("존재하지 않는 유저입니다.")}).data)
 
     def get_object(self):
         lookup_field_value = self.kwargs[self.lookup_field]
