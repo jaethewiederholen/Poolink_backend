@@ -1,14 +1,16 @@
 from rest_framework import serializers
 
 from poolink_backend.apps.notification.models import Notification
+from poolink_backend.bases.api.serializers import ModelSerializer
 
 
-class UserNotificationSerializer(serializers.Serializer):
-
-    receiver = serializers.IntegerField()
-    sender = serializers.IntegerField()
-    board = serializers.IntegerField()
+class UserNotificationSerializer(ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = '__all__'
+        fields = ['id', 'sender', 'receiver', 'board', 'notification', 'created']
+
+
+class NotificationCheckSerializer(serializers.Serializer):
+
+    check = serializers.IntegerField()

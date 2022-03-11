@@ -16,7 +16,7 @@ else:
 router.register("users", UserViewSet, basename="User")
 router.register("boards", BoardViewSet, basename="Board")
 router.register("links", LinkViewSet, basename="Link")
-router.register("notification", NotificationViewSet, basename="Notification")
+router.register("notifications", NotificationViewSet, basename="Notification")
 
 
 app_name = "api"

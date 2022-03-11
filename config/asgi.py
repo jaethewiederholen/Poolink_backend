@@ -47,7 +47,7 @@ application = ProtocolTypeRouter({
     'http': get_asgi_application(),
     'websocket': AuthMiddlewareStack(
         URLRouter([
-            re_path(r'api/notification/$', consumers.NotificationConsumer.as_asgi())
+            re_path(r'notification/$', consumers.NotificationConsumer.as_asgi())
         ])
     ),
 })

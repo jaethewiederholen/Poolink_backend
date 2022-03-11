@@ -66,6 +66,9 @@ class BoardViewSet(ModelViewSet):
 
         serializer = BoardCreateSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
+            if request.user.boards.filter(searchable=0).count() >= 3:
+                return Response(status=HTTP_400_BAD_REQUEST,
+                                data=MessageSerializer({"message": _("유저의 비공개 보드는 3개까지 가능합니다.")}).data)
             new_board = serializer.save()
             data = {"id": new_board.id}
             data.update(MessageSerializer({"message": _("보드를 생성했습니다.")}).data)
@@ -83,6 +86,16 @@ class BoardViewSet(ModelViewSet):
         except Board.DoesNotExist:
             raise NotFound
         return Response(status=HTTP_200_OK, data=SingleBoardSerializer(board, context={'request': request}).data)
+
+    @swagger_auto_schema(
+        operation_id=_("객체 수정")
+    )
+    def partial_update(self, request, *args, **kwargs):
+        if request.user.boards.filter(searchable=0).count() >= 3:
+            return Response(status=HTTP_400_BAD_REQUEST,
+                            data=MessageSerializer({"message": _("유저의 비공개 보드는 3개까지 가능합니다.")}).data)
+        ret = super(BoardViewSet, self).partial_update(request)
+        return Response(status=HTTP_200_OK, data=ret.data)
 
     @action(methods=['delete'], detail=False, url_path='bulk-delete')
     @swagger_auto_schema(

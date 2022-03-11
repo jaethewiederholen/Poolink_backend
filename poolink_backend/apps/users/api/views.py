@@ -5,6 +5,7 @@ import requests
 from allauth.socialaccount.providers.google import views as google_view
 from dj_rest_auth.registration.views import SocialLoginView
 from django.contrib.auth import logout
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -12,15 +13,18 @@ from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_409_CONFLICT
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_409_CONFLICT
 from rest_framework.viewsets import GenericViewSet
 from rest_framework_simplejwt.tokens import OutstandingToken, RefreshToken
 from rest_framework_simplejwt.views import TokenRefreshView
 
 from config.settings import base as settings
+from poolink_backend.apps.notification.api.serializers import UserNotificationSerializer
+from poolink_backend.apps.notification.models import Notification
 from poolink_backend.apps.users.api.serializers import (
     CustomTokenRefreshSerializer,
     DuplicateCheckSerializer,
@@ -29,6 +33,7 @@ from poolink_backend.apps.users.api.serializers import (
     ValidateRefreshTokenSerializer,
 )
 from poolink_backend.apps.users.models import Path, User
+from poolink_backend.bases.api.paginations import SmallResultsSetPagination
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 
@@ -170,6 +175,26 @@ class ValidateRefreshTokenView(BaseAPIView):
 class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
+
+    # 특정 유저 알림 api users/{user:id}/notification
+    @action(detail=True, url_path='notification')
+    @swagger_auto_schema(
+        operation_id=_("유저 알림"),
+        operation_description=_("특정 유저의 알림 내역을 반환합니다."),
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+    )
+    def notification(self, request, pk=None):
+        paginator = SmallResultsSetPagination()
+        try:
+            user_obj = self.get_object()
+            if user_obj:
+                result = Notification.objects.filter(receiver=user_obj)
+                page = paginator.paginate_queryset(result, request)
+                serializer = UserNotificationSerializer(page, many=True, context={'request': request})
+                return paginator.get_paginated_response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response(status=HTTP_404_NOT_FOUND,
+                            data=MessageSerializer({"message": _("존재하지 않는 유저입니다.")}).data)
 
 
 class UserSignupView(BaseAPIView):
