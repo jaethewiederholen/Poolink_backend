@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend as DrfFilter
-from rest_framework import filters, mixins, viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.views import APIView as _APIView
 from url_filter.integrations.drf import DjangoFilterBackend as UrlFilter
 
@@ -13,7 +13,7 @@ class APIView(_APIView):
 class GenericViewSet(viewsets.GenericViewSet):
 
     pagination_class = SmallResultsSetPagination  # 20 items per page
-    filter_backends = [filters.OrderingFilter, filters.SearchFilter, DrfFilter, UrlFilter]
+    filter_backends = [DrfFilter, UrlFilter]
     ordering_fields = "__all__"
 
 

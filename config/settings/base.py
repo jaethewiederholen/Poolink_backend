@@ -145,6 +145,7 @@ LOCAL_APPS = [
     "poolink_backend.apps.category.apps.CategoryConfig",
     "poolink_backend.apps.link.apps.LinkConfig",
     "poolink_backend.apps.notification.apps.NotificationConfig",
+    "poolink_backend.apps.hashtag.apps.HashtagConfig",
     # Your stuff: custom apps go here
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -13,10 +13,10 @@ else:
     router = SimpleRouter()
 
 # base 의 viewset 으로 만들어진 view 들
-router.register("users", UserViewSet)
+router.register("users", UserViewSet, basename="User")
 router.register("boards", BoardViewSet, basename="Board")
-router.register("links", LinkViewSet)
-router.register("notifications", NotificationViewSet)
+router.register("links", LinkViewSet, basename="Link")
+router.register("notifications", NotificationViewSet, basename="Notification")
 
 
 app_name = "api"
@@ -26,5 +26,6 @@ urlpatterns = [
     path("links/", include("poolink_backend.apps.link.urls")),
     path("categories/", include("poolink_backend.apps.category.urls")),
     path("users/", include("poolink_backend.apps.users.urls")),
+    path("hashtags/", include("poolink_backend.apps.hashtag.urls")),
 
 ] + router.urls

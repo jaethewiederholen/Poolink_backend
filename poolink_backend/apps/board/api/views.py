@@ -17,9 +17,9 @@ from poolink_backend.apps.board.api.serializers import (
     SingleBoardSerializer,
 )
 from poolink_backend.apps.board.models import Board
-from poolink_backend.apps.category.models import Category
 from poolink_backend.apps.permissions import BoardPermission
 from poolink_backend.apps.users.models import User
+from poolink_backend.bases.api.paginations import SmallResultsSetPagination
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
 from poolink_backend.bases.api.views import ModelViewSet
@@ -28,25 +28,31 @@ from poolink_backend.bases.api.views import ModelViewSet
 class BoardViewSet(ModelViewSet):
     permission_classes = ([BoardPermission])
     serializer_class = BoardSerializer
+    queryset = Board.objects.all()
 
-    def get_queryset(self):
-        queryset = Board.objects.all()
-        user = self.request.user
-        if user is not None:
+    @swagger_auto_schema(
+        operation_id=_("리스트조회"),
+        operation_description=_("내보드 또는 공유보드 리스트를 조회합니다."),
+        responses={200: openapi.Response(_("OK"), BoardSerializer)},
+        manual_parameters=[
+            openapi.Parameter('shared', openapi.IN_QUERY, type='boolean')],
+    )
+    def list(self, request):
+        user = request.user
+        shared = bool(request.query_params.get('shared', None))
+        paginator = SmallResultsSetPagination()
+        if shared:
+            invited_boards = user.invited_boards.all()
+            owned_share_boards = user.boards.filter(invited_users__isnull=False)
+            boards = owned_share_boards.union(invited_boards)
 
-            shared = bool(self.request.query_params.get('shared', None))
-            if shared:
-                invited_boards = user.invited_boards.all()
-                owned_share_boards = user.boards.filter(invited_users__isnull=False)
-                boards = owned_share_boards.union(invited_boards)
-
-            else:
-                my_board = Board.objects.filter(user=user, invited_users__isnull=True)
-                scrapped_board = self.request.user.scrap.all()
-                boards = my_board.union(scrapped_board)
-
-            return boards.order_by('-is_bookmarked')
-        return queryset.none()
+        else:
+            my_board = Board.objects.filter(user=user, invited_users__isnull=True)
+            scrapped_board = self.request.user.scrap.all()
+            boards = my_board.union(scrapped_board).order_by('-is_bookmarked')
+        page = paginator.paginate_queryset(boards, request)
+        serializer = BoardSerializer(page, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
         operation_id=_("생성"),
@@ -61,7 +67,6 @@ class BoardViewSet(ModelViewSet):
         serializer = BoardCreateSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             new_board = serializer.save()
-            new_board.update(image=Category.objects.get(id=serializer.validated_data["category"][0]).image)
             data = {"id": new_board.id}
             data.update(MessageSerializer({"message": _("보드를 생성했습니다.")}).data)
             return Response(

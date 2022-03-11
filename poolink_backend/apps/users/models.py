@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.authtoken.models import Token
 
 from poolink_backend.apps.category.models import Category
+from poolink_backend.apps.hashtag.models import Hashtag
 from poolink_backend.bases.models import Model
 
 
@@ -96,6 +97,12 @@ class User(AbstractBaseUser, Model, PermissionsMixin):
         _("약관동의여부"),
         help_text=_("이용약관에 동의하였는지 여부를 나타냅니다."),
         default=False,
+    )
+    preferred_tags = models.ManyToManyField(
+        Hashtag,
+        related_name="preferred_tag",
+        help_text=_("유저의 선호 태그들입니다."),
+        null=True,
     )
 
     objects = UserManager()
