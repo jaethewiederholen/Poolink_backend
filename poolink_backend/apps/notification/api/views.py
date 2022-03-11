@@ -1,9 +1,10 @@
 from django.utils.translation import ugettext_lazy as _
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.notification.models import Notification
@@ -12,7 +13,7 @@ from poolink_backend.bases.api.paginations import SmallResultsSetPagination
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.viewsets import ModelViewSet
 
-from .serializers import UserNotificationSerializer
+from .serializers import NotificationCheckSerializer, UserNotificationSerializer
 
 
 class NotificationViewSet(ModelViewSet):
@@ -65,3 +66,32 @@ class NotificationViewSet(ModelViewSet):
                                              notification=f"{sender} 님이 {board.name} 보드에 회원님을 초대했습니다.")
 
         return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _(result.notification)}).data)
+
+    # 수락/삭제 api notification/{id}/check
+    # 수락하면 status 0에서 1, 삭제하면 2로 바꾸고, user/{id}/notification 에서 status 2 빼고 보여주기
+    @action(methods=['post'], detail=True, url_path='check')
+    @swagger_auto_schema(
+        operation_id=_("알림 수락/삭제"),
+        operation_description=_("수신한 알림에 대해 수락/삭제를 결정합니다."),
+        request_body=NotificationCheckSerializer,
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+    )
+    def check(self, request, pk):
+        notification = Notification.objects.get(id=pk)
+        check = request.data.get('check')  # 1이면 수락, 2면 거절
+
+        board = notification.board
+        receiver = notification.receiver
+
+        if check == 1:
+            board.invited_users.add(receiver)  # 초대 유저에 추가
+            Notification.objects.filter(id=pk).update(status=1)
+
+        elif check == 2:
+            Notification.objects.filter(id=pk).update(status=2)
+
+        else:
+            return Response(status=HTTP_400_BAD_REQUEST,
+                            data=MessageSerializer({"message": _("check 값은 1 또는 2여야 합니다.")}).data)
+
+        return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("유저를 초대했습니다.")}).data)
