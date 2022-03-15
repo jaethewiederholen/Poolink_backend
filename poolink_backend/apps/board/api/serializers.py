@@ -100,7 +100,7 @@ class BoardCreateSerializer(ModelSerializer):
 
     class Meta:
         model = Board
-        fields = ['name', 'user', 'tags']
+        fields = ['name', 'user', 'tags', 'bio', 'emoji']
 
     def create(self, validated_data):
 

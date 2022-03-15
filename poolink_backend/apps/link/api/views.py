@@ -57,8 +57,8 @@ class LinkViewSet(ModelViewSet):
                                                                 description="링크 라벨입니다"),
                                         'url': openapi.Schema(type=openapi.TYPE_STRING,
                                                               description="링크 url을 저장하세요"),
-                                        'show': openapi.Schema(type=openapi.TYPE_BOOLEAN,
-                                                               description="링크의 공개 여부를 나타냅니 ")
+                                        'memo': openapi.Schema(type=openapi.TYPE_STRING,
+                                                               description="링크 내용에 대한 메모입니다")
                                     }),
         responses={200: openapi.Response(_("OK"), MessageSerializer)},
     )
@@ -79,7 +79,7 @@ class LinkViewSet(ModelViewSet):
                 board=serializer.validated_data['board'],
                 label=serializer.validated_data['label'],
                 url=serializer.validated_data['url'],
-                show=serializer.validated_data['show'],
+                memo=serializer.validated_data['memo'],
                 favicon=favicon,
                 meta_image=meta_image
             )
