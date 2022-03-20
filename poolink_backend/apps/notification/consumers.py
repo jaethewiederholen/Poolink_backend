@@ -8,18 +8,22 @@ from poolink_backend.apps.board.models import Board
 from poolink_backend.apps.notification.models import Notification
 from poolink_backend.apps.users.models import User
 
+created = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+09:00')
+
 
 class NotificationConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
-        self.group_name = 'notification'
+        # self.group_name = 'notification'
+        self.room_name = self.scope['url_route']['kwargs']['receiver']
+        self.group_name = 'chat_%s' % self.room_name
 
         # join to group
         await self.channel_layer.group_add(self.group_name, self.channel_name)
 
         await self.accept()
 
-    async def disconnect(self):
+    async def disconnect(self, close_code):
         # leave group
         await self.channel_layer.group_discard(self.group_name, self.channel_name)
 
@@ -30,8 +34,6 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         sender = text_data_json['sender']
         board = text_data_json['board']
         notification = text_data_json['notification']
-
-        created = datetime.now().strftime('%Y-%m-%dT%H:%M:%S+09:00')
 
         event = {
             'type': 'send_notification',
@@ -54,16 +56,18 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         board = await sync_to_async(Board.objects.get, thread_sensitive=True)(id=event['board'])
         notification = f"{sender} 님이 {board.name} 보드에 회원님을 초대했습니다."
 
-        await sync_to_async(Notification.objects.create, thread_sensitive=True)(receiver=receiver,
-                                                                                sender=sender,
-                                                                                board=board,
-                                                                                notification=notification)
+        await sync_to_async(Notification.objects.update_or_create, thread_sensitive=True)(
+            receiver=receiver,
+            sender=sender,
+            board=board,
+            notification=notification
+            )
 
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             "sender": event['sender'],
             "receiver": event['receiver'],
             "board": event['board'],
-            "created_at": event['created_at'],
+            "created": created,
             "notification": event['notification']
         }))
