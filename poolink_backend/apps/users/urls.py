@@ -7,6 +7,7 @@ from .api.views import (
     duplicate_check_view,
     user_delete_view,
     user_logout_view,
+    user_search_view,
     user_signup_view,
 )
 
@@ -20,4 +21,5 @@ urlpatterns = [
     path("token/refresh", CustomTokenRefreshView.as_view()),
     path("token/validate", ValidateRefreshTokenView.as_view()),
     path("check-duplicate", view=duplicate_check_view),
+    path("search", view=user_search_view),
 ]

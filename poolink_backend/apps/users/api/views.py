@@ -197,6 +197,30 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
                             data=MessageSerializer({"message": _("존재하지 않는 유저입니다.")}).data)
 
 
+class UserSearchByNicknameView(BaseAPIView):
+    allowed_method = "GET"
+
+    nickname = openapi.Parameter('nickname', openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING)
+
+    @swagger_auto_schema(
+        operation_id=_("Search User by Nickname"),
+        operation_description=_("닉네임으로 유저 정보 검색"),
+        manual_parameters=[nickname],
+        responses={200: openapi.Response(_("OK"), UserSerializer)},
+    )
+    def get(self, request):
+        nickname = request.GET.get("nickname", None)
+        print("요청: ", nickname)
+
+        try:
+            user = User.objects.get(username=nickname)
+            print("test!!", user)
+            print("유저는 == ", UserSerializer(user).data)
+            return Response(status=HTTP_200_OK, data=UserSerializer(user).data)
+        except Exception as e:
+            return Response(status=HTTP_404_NOT_FOUND, data=MessageSerializer({"message": str(e)}).data)
+
+
 class UserSignupView(BaseAPIView):
     allowed_method = "PUT"
 
@@ -299,3 +323,4 @@ duplicate_check_view = DuplicateCheckView.as_view()
 user_signup_view = UserSignupView.as_view()
 user_logout_view = UserLogoutView.as_view()
 user_delete_view = UserDeleteView.as_view()
+user_search_view = UserSearchByNicknameView.as_view()
