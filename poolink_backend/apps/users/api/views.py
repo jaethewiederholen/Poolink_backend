@@ -28,11 +28,12 @@ from poolink_backend.apps.notification.models import Notification
 from poolink_backend.apps.users.api.serializers import (
     CustomTokenRefreshSerializer,
     DuplicateCheckSerializer,
+    FeedbackSerializer,
     LogoutSerializer,
     SignupSerializer,
     ValidateRefreshTokenSerializer,
 )
-from poolink_backend.apps.users.models import Path, User
+from poolink_backend.apps.users.models import Feedback, Path, User
 from poolink_backend.bases.api.paginations import SmallResultsSetPagination
 from poolink_backend.bases.api.serializers import MessageSerializer
 from poolink_backend.bases.api.views import APIView as BaseAPIView
@@ -197,6 +198,30 @@ class UserViewSet(RetrieveModelMixin, ListModelMixin, UpdateModelMixin, GenericV
                             data=MessageSerializer({"message": _("존재하지 않는 유저입니다.")}).data)
 
 
+class UserSearchByNicknameView(BaseAPIView):
+    allowed_method = "GET"
+
+    nickname = openapi.Parameter('nickname', openapi.IN_QUERY, required=True, type=openapi.TYPE_STRING)
+
+    @swagger_auto_schema(
+        operation_id=_("Search User by Nickname"),
+        operation_description=_("닉네임으로 유저 정보 검색"),
+        manual_parameters=[nickname],
+        responses={200: openapi.Response(_("OK"), UserSerializer)},
+    )
+    def get(self, request):
+        nickname = request.GET.get("nickname", None)
+        print("요청: ", nickname)
+
+        try:
+            user = User.objects.get(username=nickname)
+            print("test!!", user)
+            print("유저는 == ", UserSerializer(user).data)
+            return Response(status=HTTP_200_OK, data=UserSerializer(user).data)
+        except Exception as e:
+            return Response(status=HTTP_404_NOT_FOUND, data=MessageSerializer({"message": str(e)}).data)
+
+
 class UserSignupView(BaseAPIView):
     allowed_method = "PUT"
 
@@ -295,7 +320,25 @@ class DuplicateCheckView(BaseAPIView):
                                 data=MessageSerializer({"message": _("이미 사용중인 유저네임입니다.")}).data)
 
 
+class FeedbackView(BaseAPIView):
+    allowed_method = "POST"
+
+    @swagger_auto_schema(
+        operation_id=_("Post Feedback"),
+        operation_description=_("피드백을 작성합니다."),
+        request_body=FeedbackSerializer,
+        responses={200: openapi.Response(_("OK"), MessageSerializer)},
+    )
+    def post(self, request):
+        serializer = FeedbackSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            Feedback.objects.create(user=request.user, feedback=serializer.validated_data["feedback"])
+            return Response(status=HTTP_200_OK, data=MessageSerializer({"message": _("피드백 작성을 완료했습니다.")}).data)
+
+
 duplicate_check_view = DuplicateCheckView.as_view()
 user_signup_view = UserSignupView.as_view()
 user_logout_view = UserLogoutView.as_view()
 user_delete_view = UserDeleteView.as_view()
+user_search_view = UserSearchByNicknameView.as_view()
+post_feedback_view = FeedbackView.as_view()

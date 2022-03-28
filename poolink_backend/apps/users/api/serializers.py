@@ -141,3 +141,7 @@ class ValidateRefreshTokenSerializer(serializers.Serializer):
 
 class LogoutSerializer(serializers.Serializer):
     refresh_token = serializers.CharField()
+
+
+class FeedbackSerializer(serializers.Serializer):
+    feedback = serializers.CharField()
