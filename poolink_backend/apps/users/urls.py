@@ -5,6 +5,7 @@ from .api.views import (
     GoogleLogin,
     ValidateRefreshTokenView,
     duplicate_check_view,
+    post_feedback_view,
     user_delete_view,
     user_logout_view,
     user_search_view,
@@ -22,4 +23,5 @@ urlpatterns = [
     path("token/validate", ValidateRefreshTokenView.as_view()),
     path("check-duplicate", view=duplicate_check_view),
     path("search", view=user_search_view),
+    path("feedback", view=post_feedback_view),
 ]

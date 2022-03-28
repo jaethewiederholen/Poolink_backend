@@ -134,3 +134,17 @@ class Path(Model):
         verbose_name=_("알게된 경로"),
         help_text=_("알게된 경로"),
     )
+
+
+class Feedback(Model):
+    user = models.ForeignKey(
+        User,
+        verbose_name=_("피드백 작성자"),
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name="feedback",
+    )
+    feedback = models.TextField(
+        verbose_name=_("피드백"),
+        help_text=_("피드백"),
+    )

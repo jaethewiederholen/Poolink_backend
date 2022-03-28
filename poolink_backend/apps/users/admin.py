@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from poolink_backend.apps.users.forms import UserChangeForm, UserCreationForm
-from poolink_backend.apps.users.models import Path
+from poolink_backend.apps.users.models import Feedback, Path
 
 User = get_user_model()
 
@@ -54,6 +54,11 @@ class UserAdmin(auth_admin.UserAdmin):
         "is_superuser",
     ]
     search_fields = ["username"]
+
+
+@admin.register(Feedback)
+class FeedbackAdmin(admin.ModelAdmin):
+    list_display = ("feedback", "user")
 
 
 admin.site.register(User, UserAdmin)
